@@ -127,7 +127,6 @@ def setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transac
     c.drawRightString(330, 680, address_third_line)
     c.drawRightString(330, 660, contact_no_first)
     c.drawString(35, 640, "GST IN:")
-
     c.drawRightString(330, 640, customer_gst_p)
     # c.setFont("CarroisGothic-Regular", 10, leading=None)
     c.drawString(360, 730, "Invoice No:")
@@ -181,7 +180,6 @@ def setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transac
     if not cgst2_5_taxable_amount == 0:
         c.drawRightString(190, 205, str(cgst2_5_taxable_amount))
         c.drawRightString(310,205,str(cgst2_5_amount * 2))
-
     c.drawString(390,205,"Transport:")#transport
     if not freight_p == 0:
         c.drawRightString(550, 205, str(freight_p))
@@ -234,7 +232,6 @@ def setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transac
     c.drawString(30, 10, "Subject to " + custom_data.custom_city + " Jurisdiction")
     c.setFont("CarroisGothic-Regular", 12, leading=None)
     return c
-
 
 def create_(invoice_, page_size, **kwargs):
     master_= kwargs.get('master_', '')
