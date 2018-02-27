@@ -17,5 +17,5 @@ os.system(dropbox_command)
 time.sleep(2)
 local_folder = "~/git_clones/Dropbox-Uploader/" +  folder_name
 print(local_folder)
-unzip_command = "7z x " + local_folder
+unzip_command = "7z x " + local_folder + " -obackup/"
 os.system(unzip_command)
