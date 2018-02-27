@@ -13,7 +13,7 @@ import os
 import master
 from decimal import Decimal
 
-Database.initialise(database='chip', host='localhost', user='dba_tovak', password='j')
+Database.initialise(database='chip', host='localhost', user='dba_tovak')
 result = cf.psql_("select gst_name, gst_place, gst_number from gst_old_customer where gst_number is null")
 without = cf.psql_("select name, place, nickname from customer")
 without = [a[2] for a in without]

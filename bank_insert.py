@@ -158,7 +158,7 @@ def get_options_list(amount):
 
 if __name__ == "__main__":
     from database import Database, CursorFromConnectionFromPool as conn
-    Database.initialise(database='chip', host='localhost', user='dba_tovak', password='j')
+    Database.initialise(database='chip', host='localhost', user='dba_tovak' )
     # make_dr_entries()
     # view_ledger()
     try:

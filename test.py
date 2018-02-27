@@ -13,7 +13,7 @@ import master
 from decimal import Decimal
 
 confirm_ = cf.prompt_("This", ['abc','acb', 'b'])
-# Database.initialise(database='chip', host='localhost', user='dba_tovak', password='j')
+# Database.initialise(database='chip', host='localhost', user='dba_tovak')
 
 # master.backup(drop_=True)
 # a = Decimal(5.50)

@@ -267,4 +267,4 @@ def clear_screen(**kwargs):
         print(msg)
 
 if __name__ == "__main__":
-    Database.initialise(database='chips_stack', host='localhost', user='dba_tovak', password='j')
+    Database.initialise(database='chips_stack', host='localhost', user='dba_tovak')

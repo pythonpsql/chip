@@ -164,7 +164,7 @@ def get_buy_rate(product_name):
 
 if __name__ == "__main__":
     from database import Database, CursorFromConnectionFromPool as conn
-    Database.initialise(database='chips_stack', host='localhost', user='dba_tovak', password='j')
+    Database.initialise(database='chips_stack', host='localhost', user='dba_tovak')
     name="Topman Tarrim Two Way Angle"
     unit="Nos"
     p = Product(name, unit)
