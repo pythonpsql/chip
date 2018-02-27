@@ -1,0 +1,33 @@
+
+import os
+import sys
+
+f = sys.argv[1]
+if os.path.exists(f):
+    print("Backing up 'chip'")
+    backup_command = "pg_dump -Fc -U dba_tovak -d chip -h localhost > chip_full_db_backup.pgsql"
+    os.system(backup_command)
+    # sys.exit()
+    print(f)
+
+    delete_command = "psql -U dba_tovak -d chip -h localhost -c 'drop schema public cascade'"
+    print("Deleting 'public'")
+    os.system(delete_command)
+    create_command = "psql -U dba_tovak -d chip -h localhost -c 'create schema public'"
+    print("Creating empty 'public'")
+    os.system(create_command)
+    restore_command = "pg_restore -U dba_tovak -h localhost -d chip " + f
+
+    # print(delete_command)
+    confirm_ = input("Do you want to execute the above command? (y/n)").strip().lower()
+    if confirm_ == "y":
+        # os.system(delete_command)
+        print(restore_command)
+        os.system(restore_command)
+        print("db restored")
+    else:
+        print('You canceled. No changes were made')
+else:
+    print("You need to specify a valid file path to restore data from")
+    print("e.g. python delete_restore_db.py <filepath>")
+
