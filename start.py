@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 from database import Database, CursorFromConnectionFromPool as conn
 from prettytable import PrettyTable
 import command_functions as cm
