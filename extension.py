@@ -16,7 +16,7 @@ detail_properties = ["id_invoice", "id_product",  "product_name", "product_qty",
 
 class Extension():
 
-    def __init__(self, input_, invoice_): # input_ = "ex [h] 25-4 40-5"
+    def __init__(self, input_, invoice_, **kwargs): # input_ = "ex [h] 25-4 40-5"
         self.invoice_ = invoice_
         self.invoice_type = invoice_.invoice_type
         self.invoice_detail_type = cf.invoice_detail_type_d[self.invoice_type]
@@ -147,6 +147,7 @@ class Extension():
     def get_product_rate(self, size):
         rate = (Decimal(self.rate)*Decimal(size)).quantize(Decimal("1.00"))
         return rate
+
 def set_owner_product_rate(owner_product, id_product, id_owner, rate, **kwargs):
     now = datetime.datetime.now()
     rate_date = str(datetime.datetime.today())

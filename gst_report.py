@@ -230,7 +230,9 @@ def setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transac
     # c.drawInlineImage(image_path, 425,35,70,30)
     # mask = [254, 255, 254, 255, 254, 255]
     c.drawImage(image_path, 425,35,70,30,mask='auto')
-    c.drawString(30, 5, "Subject to " + custom_data.custom_city + " Jurisdiction")
+    c.setFont("CarroisGothic-Regular", 10, leading=None)
+    c.drawString(30, 10, "Subject to " + custom_data.custom_city + " Jurisdiction")
+    c.setFont("CarroisGothic-Regular", 12, leading=None)
     return c
 
 
@@ -238,7 +240,11 @@ def create_(invoice_, page_size, **kwargs):
     master_= kwargs.get('master_', '')
     invoice_detail_info_p = invoice_.fetch_invoice_details_gst(master_=master_)
     invoice_info_p = invoice_
-    transactor_name_p = invoice_.owner.gst_name
+    transactor_name_p = invoice_.gst_owner_name
+    if not transactor_name_p:
+        temp_name = invoice_.owner.set_gst_name()
+        transactor_name_p = temp_name
+        invoice_.gst_owner_name = temp_name
     transactor_place_p = invoice_.owner_place
     customer_details_p = invoice_.owner
     memo_type_p = invoice_.memo_type

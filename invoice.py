@@ -18,6 +18,10 @@ def get_new_invoice(invoice_type, **kwargs):
     invoice_.owner = get_invoice_owner(invoice_, nickname=kwargs.get('nickname', ''))
     invoice_.owner_name = invoice_.owner.name
     invoice_.gst_owner_name = invoice_.owner.gst_name
+    if invoice_.gst_owner_name is None:
+        temp_name = invoice_.owner.set_gst_name()
+        invoice_.gst_owner_name = temp_name
+    print(invoice_.gst_owner_name)
     invoice_.owner_place = invoice_.owner.place
     invoice_.no_ = get_invoice_no(invoice_type)
     invoice_.freight = 0
@@ -350,7 +354,8 @@ def get_invoice_owner(invoice_, **kwargs):
     if not owner_nickname:
         owner_nickname = cf.prompt_("Enter {} nickname: ".format(invoice_.owner_type), cf.get_completer_list("nickname", invoice_.owner_type))
     owner_ = owner.get_existing_owner_by_nickname(invoice_.owner_type, owner_nickname)
-    print(owner_)
+    print(owner_.gst_name)
+
     if not owner_:
         owner_ = owner.get_new_owner(invoice_.owner_type, nickname=owner_nickname)
     return owner_
@@ -376,9 +381,9 @@ def get_last_invoice_no_from_db(invoice_type, **kwargs):
 
 def create_new_invoice_in_db(invoice_):
     cf.log_("db: create_new_invoice_in_db")
-    sq = "insert into {} (invoice_no, id_owner, owner_name, owner_place, date_) values (%s, %s, %s, %s, %s) returning id".format(invoice_.invoice_type)
+    sq = "insert into {} (invoice_no, id_owner, owner_name, owner_place, date_, gst_owner_name) values (%s, %s, %s, %s, %s, %s) returning id".format(invoice_.invoice_type)
     with conn() as cursor:
-        cursor.execute(sq, (invoice_.no_, invoice_.owner.id, invoice_.owner.name, invoice_.owner.place, invoice_.date_))
+        cursor.execute(sq, (invoice_.no_, invoice_.owner.id, invoice_.owner.name, invoice_.owner.place, invoice_.date_, invoice_.gst_owner_name))
         return cursor.fetchone()[0]
 
 

@@ -23,15 +23,19 @@ def get_new_invoice_detail_by_product(invoice_, product_name, product_qty):
     invoice_detail_.product_id = product_.id
     invoice_detail_.product_name = product_.name
     invoice_detail_.product_unit = product_.unit
-    if product_.hsn is None:
+    if not product_.hsn:
         product_.edit_product_property("hsn")
     invoice_detail_.product_hsn= product_.hsn
     if product_.gst_rate is None:
         product_.edit_product_property("gst_rate")
     invoice_detail_.product_gst_rate= product_.gst_rate
     invoice_detail_.product_print_name = product_.print_name
-    if product_.gst_name is None:
+    print('product_.gst_name: {}'.format(product_.gst_name))
+    if not product_.gst_name:
+        print('product_.gst_name: {}'.format(product_.gst_name))
         product_.edit_product_property("gst_name")
+    else:
+        print('product_.gst_name is not None')
     invoice_detail_.product_gst_name = product_.gst_name
     id_pricelist = plf.get_id_pricelist_from_id_product(invoice_detail_.product_id)
     if id_pricelist:

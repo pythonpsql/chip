@@ -16,7 +16,7 @@ owner_commands_dict = {
 
 #owner_commands_completer = WordCompleter(commands_list, meta_dict=owner_commands_dict)
 
-sq_properties = ['id', 'name', 'place', 'email_address', 'preferred_transport', 'note', 'address_line_one', 'address_line_two', 'address_line_three', 'contact_one', 'contact_two', 'contact_three', 'gst_number', 'nickname', 'gst_name']
+sq_properties = ['id', 'name', 'place', 'email_address', 'preferred_transport', 'note', 'address_line_one', 'address_line_two', 'address_line_three', 'contact_one', 'contact_two', 'contact_three', 'gst_number',  'gst_name', 'nickname']
 
 def get_new_owner(owner_type, **kwargs):
     owner_ = Owner(owner_type)
@@ -70,6 +70,11 @@ class Owner():
     def set_gst_number(self):
         self.gst_number = cf.prompt_("Enter GST Number for {}: ".format(self.nickname), [], default_="27")
         cf.psql_("update {} set gst_number = %s where id = %s".format(self.owner_type), arg_=(self.gst_number, self.id))
+
+    def set_gst_name(self):
+        self.gst_name= cf.prompt_("Enter GST Owner Name for {}: ".format(self.nickname), [], default_=self.name, empty_="yes")
+        cf.psql_("update {} set gst_name = %s where id = %s".format(self.owner_type), arg_=(self.gst_name, self.id))
+        return self.gst_name
 
     def edit_properties(self):
         property_ = cf.prompt_("Choose property to edit: ", sq_properties)
