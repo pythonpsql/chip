@@ -5,7 +5,7 @@ import sys
 f = sys.argv[1]
 if os.path.exists(f):
     print("Backing up 'chip'")
-    backup_command = "pg_dump -Fc -U dba_tovak -d chip -h localhost > chip_full_db_backup.pgsql"
+    backup_command = "pg_dump -Fc -U dba_tovak -d chip -h localhost > backup/chip_full_db_backup.pgsql"
     os.system(backup_command)
     # sys.exit()
     print(f)

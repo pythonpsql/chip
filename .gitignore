@@ -20,3 +20,4 @@ custom_data.py
 gst_invoices/*
 fonts/some_pic.png
 *.csv
+*.sql
