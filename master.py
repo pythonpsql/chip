@@ -90,7 +90,7 @@ def update_stock(table_, saved_id_table_tuple):
     # update si_detail date_
     if table_ == "sale_invoice":
         date_sq = "update si_detail set date_ = ( select date_ from sale_invoice where sale_invoice.id = si_detail.id_invoice)"
-        sq = "insert into stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id in %s"
+        sq = "insert into stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id_invoice in %s"
         print('Updating date_ in si_detail...')
         with conn() as cursor:
             cursor.execute(date_sq)
@@ -100,7 +100,7 @@ def update_stock(table_, saved_id_table_tuple):
 
     elif table_ == "purchase_invoice":
         date_sq = "update pi_detail set date_ = ( select date_ from purchase_invoice where purchase_invoice.id = pi_detail.id_invoice)"
-        sq = "insert into stock (id_pi_detail, id_product, product_name, product_unit, qty_purchase, date_) select id, id_product, product_name, product_unit, product_qty, date_ from pi_detail where pi_detail.id in %s"
+        sq = "insert into stock (id_pi_detail, id_product, product_name, product_unit, qty_purchase, date_) select id, id_product, product_name, product_unit, product_qty, date_ from pi_detail where pi_detail.id_invoice in %s"
         print('Updating date_ in pi_detail...')
         with conn() as cursor:
             cursor.execute(date_sq)

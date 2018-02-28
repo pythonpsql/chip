@@ -187,7 +187,6 @@ def set_owner_product_rate(owner_product, id_product, id_owner, rate, **kwargs):
         sq = "insert into {} (id_owner, id_product, rate, timestamp_) values (%s, %s, %s, %s) returning id".format(owner_product)
     try:
         with conn() as cursor:
-            print("rechaeasf")
             cursor.execute(usq, (rate, rate_date, id_owner, id_product))
             result = cursor.fetchall()
             print(result)

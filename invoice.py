@@ -311,6 +311,7 @@ class Invoice():
         cf.cursor_(sql.SQL("update {} set {} = %s where id = %s returning id").format(sql.Identifier(self.invoice_type), sql.Identifier(property_)), arguments=(new_value, self.id))
 
     def save(self):
+        self.validate_before_save()
         transaction_type = {"sale_invoice": "sale_transaction", "purchase_invoice": "purchase_transaction"}
         with conn() as cursor:
             joined = sql.Composed([sql.SQL('excluded.'), sql.Identifier('amount')])
@@ -318,6 +319,9 @@ class Invoice():
             cursor.execute(sq, (self.invoice_type, self.id,self.owner.id, self.date_, self.amount_after_freight ))
             result = cursor.fetchone()
             cf.log_(result)
+
+    def validate_before_save(self):
+        pass
 
 def view_print(result):
     left_align = ["name"]

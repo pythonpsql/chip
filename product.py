@@ -44,7 +44,10 @@ class Product():
         new_value = cf.prompt_("Enter new {} for {}: ".format(property_, self.name), cf.get_completer_list(property_, "product"), default_=old_value, empty_="yes")
         if old_value == new_value: return None
         setattr(self, property_, new_value)
-        cf.execute_("update product set {} = %s where id = %s returning id", [property_], arg_=(new_value, self.id))
+        try:
+            cf.execute_("update product set {} = %s where id = %s returning id", [property_], arg_=(new_value, self.id))
+        except Exception as e:
+            print(e)
 
 def get_product_name_from_id(id_):
     with conn() as cursor:

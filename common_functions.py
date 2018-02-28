@@ -128,7 +128,7 @@ def prompt_(display_text, completer_list, **kwargs):
     ''' returns non-null [unique] user input.
         User input ':q' returns "quit" '''
     empty_ = kwargs.get('empty_', '')
-    history_file = kwargs.get('history', 'temp.txt')
+    history_file = kwargs.get('history', temp_file)
     unique_ = kwargs.get('unique_', 'n')
     default_ = kwargs.get('default_', '')
     completer = WordCompleter(completer_list, ignore_case=True, sentence=True, match_middle=True)

@@ -53,7 +53,6 @@ def get_new_invoice_detail_by_product(invoice_, product_name, product_qty):
                 product_rate = get_previous_rate(id_owner, owner_product, invoice_detail_.product_id)
             else:
                 product_rate = get_previous_rate(id_owner, owner_product, invoice_detail_.product_id, gst_=True)
-
         print(id_owner, invoice_detail_.product_id)
         if not product_rate:
             product.get_buy_rate(invoice_detail_.product_name)
@@ -68,7 +67,44 @@ def get_new_invoice_detail_by_product(invoice_, product_name, product_qty):
     invoice_detail_.sub_total = invoice_detail_.get_sub_total()
     invoice_detail_.packed = None
     invoice_detail_.id = create_new_invoice_detail_in_db(invoice_detail_)
+    if invoice_.invoice_type == "sale_invoice":
+        pass
+        # set_product_cost(invoice_detail_)
     return invoice_detail_
+
+
+def ask_cost():
+    return cf.prompt_("Enter cost: ", [], empty_='yes')
+
+def update_cost_in_product(id_product, cost):
+    cf.psql_("update product set cost = %s where id = %s", arg_=(cost, id_product))
+
+def get_product_cost(id_product):
+    previous_cost = get_previous_cost(id_product)
+    if previous_cost[0][0]:
+        return previous_cost[0][0]
+    else:
+        return None
+
+def update_cost_in_si_detail(invoice_detail_, product_cost):
+    cost_sub_total = (Decimal(product_cost) * Decimal(invoice_detail_.product_qty)).quantize(Decimal("1.00"))
+    print('cost_sub_total: {}'.format(cost_sub_total))
+    cf.psql_("update si_detail set (product_cost, cost_sub_total) = (%s, %s) where id = %s", arg_=(product_cost, cost_sub_total, invoice_detail_.id))
+
+def set_product_cost(invoice_detail_):
+    product_cost = get_product_cost(invoice_detail_.product_id)
+    if not product_cost:
+        product.get_buy_rate(invoice_detail_.product_name)
+        product_cost = ask_cost()
+        if not product_cost:
+            return
+        update_cost_in_product(invoice_detail_.product_id, product_cost)
+    update_cost_in_si_detail(invoice_detail_, product_cost)
+
+
+def get_previous_cost(id_product):
+    return cf.psql_("select cost from product where id = %s", arg_= (id_product, ))
+
 
 def get_existing_invoice_detail_by_id(invoice_, id_):
     invoice_detail_ = InvoiceDetail(invoice_)
@@ -144,7 +180,7 @@ class InvoiceDetail():
                         self.product_qty,
                         self.product_unit,
                         self.product_rate,
-                        '' if self.product_discount is None else self.product_discount,
+                        '' if self.product_discount is None else str(self.product_discount),
                         self.sub_total,
                         self.product_print_name
                     ]
