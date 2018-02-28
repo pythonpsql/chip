@@ -1,5 +1,7 @@
 __pycache__
 not_main_project/*
+required/*
+temp_/*
 transfer_from_old/*
 trace_results/*
 *.txt

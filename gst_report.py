@@ -4,13 +4,15 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from num2words import num2words
 import os
-import custom_data
+import required.custom_data as custom_data
 from decimal import Decimal
 pagesize = A4
 width, height = pagesize
 project_dir = os.path.dirname(os.path.abspath(__file__))
-pdf_dir = os.path.join(project_dir, "gst_invoices")
-font_dir = os.path.join(project_dir, "fonts")
+pdf_dir = os.path.join(project_dir, "temp_")
+pdf_dir = os.path.join(pdf_dir, "gst_invoices")
+font_dir = os.path.join(project_dir, "required")
+font_dir = os.path.join(font_dir, "fonts")
 font_path = os.path.join(font_dir, "CarroisGothic-Regular.ttf")
 font_path2 = os.path.join(font_dir, "LiberationMono-Bold.ttf")
 font_path3 = os.path.join(font_dir, "larabiefont free.ttf")

@@ -11,9 +11,14 @@ import sys
 import os
 import master
 from decimal import Decimal
+import required.custom_data as custom_data
+print( custom_data.custom_state)
 
-confirm_ = cf.prompt_("This", ['abc','acb', 'b'])
-# Database.initialise(database='chip', host='localhost', user='dba_tovak')
+# confirm_ = cf.prompt_("This", ['abc','acb', 'b'])
+Database.initialise(database='chip', host='localhost', user='dba_tovak')
+invoice_type = "sale_invoice"
+result = cf.psql_("select s.invoice_no, s.date_, o.nickname, s.amount_before_freight, s.id from {} as s  where s.gst_invoice_no is not null order by s.id desc".format(invoice_type))
+print(result)
 
 # master.backup(drop_=True)
 # a = Decimal(5.50)

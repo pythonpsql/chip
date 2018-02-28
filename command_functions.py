@@ -66,6 +66,9 @@ def command_loop(invoice_):
         if command_.startswith("/"):
             command_ = command_[1:]
             return {'arg1': 'invoice_by_id', 'arg2': command_, 'arg3': invoice_.invoice_type}
+        if command_.startswith("\\"):
+            command_ = command_[1:]
+            return {'arg1': 'invoice_by_id', 'arg2': command_, 'arg3': invoice_.invoice_type}
         cf.log_("command_loop.command_ is {}".format(command_))
         if command_ == "quit": return {"arg1": "quit"}
         if command_ == "back": return {"arg1": "back"}
@@ -82,12 +85,24 @@ def command_loop(invoice_):
             return command_details
 
 def get_command(invoice_):
-    invoice_result = owner.get_filter_result("Unsaved Invoices", "sale_invoice")
-    # invoice_list = [str(a[4]) for a in invoice_result]
-    invoice_list = [str(a[5]) for a in invoice_result]
+    # invoice_result = owner.get_filter_result("Unsaved Invoices", "sale_invoice")
+    invoice_list  = owner.get_all_gst_invoices("sale_invoice")
+    estimate_list = owner.get_all_unsaved_invoices("sale_invoice")
     invoice_dict = {}
-    for a in invoice_result:
-        invoice_dict[str(a[5])] = "{}, {}, {}, {}".format(str(a[1]), str(a[2]), str(a[3]), str(a[4]))
+    estimate_dict = {}
+
+    for a in invoice_list:
+        invoice_dict[str(a[4])] = "{}, {}, {}, {}".format(str(a[0]), str(a[2]), str(a[3]), str(a[1]))
+    for a in estimate_list:
+        estimate_dict[str(a[3])] = "{}, {}, {}".format(str(a[1]), str(a[2]), str(a[0]))
+
+    invoice_list = [str(a[4]) for a in invoice_list] # do not unpack dict with * to get this list because dictionary is always unsorted
+    estimate_list = [str(a[3]) for a in estimate_list] # do not unpack dict with * to get this list because dictionary is always unsorted
+    # invoice_result = owner.get_all_unsaved_invoices(invoice_.invoice_type)
+    # invoice_list = [str(a[3]) for a in invoice_result]
+    # invoice_dict = {}
+    # for a in invoice_result:
+    #     invoice_dict[str(a[3])] = "{}, {}, {}".format(str(a[0]), str(a[1]), str(a[2]))
     cf.log_("inside get command")
     owner_product = cf.owner_product_from_invoice_type_d[invoice_.invoice_type]
     owner_product_list, owner_product_dict = product.get_owner_product_dict(owner_product, invoice_.owner.id)
@@ -99,7 +114,7 @@ def get_command(invoice_):
     owner_nickname_dict = dict.fromkeys(owner_nickname_list)
     # invoice_command_dict = {**owner_product_dict, **owner_product_abbr_dict, **owner_nickname_dict}
     invoice_command_dict = {**owner_product_dict,  **owner_nickname_dict}
-    return cf.prompt_dict("Enter {} command:".format(invoice_.invoice_type), invoice_command_dict, list_=invoice_command_list, invoice_list = invoice_list, meta_dict_two=invoice_dict)
+    return cf.prompt_dict("Enter {} command:".format(invoice_.invoice_type), invoice_command_dict, list_=invoice_command_list, invoice_list = invoice_list, invoice_dict=invoice_dict, estimate_list=estimate_list, estimate_dict=estimate_dict)
 
 def classify_command(command_, invoice_):
     cf.log_("inside classify_command")

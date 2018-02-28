@@ -117,6 +117,29 @@ def view(invoice_type,  **kwargs):
     if selected_invoice in ["back"]: return "back"
     return selected_invoice
 
+# def get_filter_sql(filter_type, invoice_type):
+def get_all_gst_invoices(invoice_type):
+    owner_type = cf.owner_type_d[invoice_type]
+    return cf.psql_("select s.gst_invoice_no, s.date_, o.nickname, s.amount_before_freight, s.id from {} as s join {} as o on o.id = s.id_owner where s.gst_invoice_no is not null order by s.gst_invoice_no desc nulls last".format(invoice_type, owner_type))
+
+def select_gst_invoice_id(result):
+    # result requirement:
+        # each tuple within result tuple must contain five elements
+        # first element must be id
+    # return id of invoice
+    if len(result) == 1:
+        return str(result[0][4])
+    for a in result:
+        invoice_dict[str(a[0])] = "{}, {}, {}, {}".format(str(a[1]), str(a[2]), str(a[3]), str(a[4]))
+    completer = WordCompleter([*invoice_dict], meta_dict = invoice_dict)
+    selected_invoice = prompt("Select invoice: ", completer=completer)
+    if selected_invoice in ["q", "b"]: return "back"
+    return invoice_dict[selected_invoice].split(",")[3].strip()
+
+def get_all_unsaved_invoices(invoice_type):
+    owner_type = cf.owner_type_d[invoice_type]
+    return cf.psql_("select s.date_, o.nickname, s.amount_before_freight, s.id from {} as s join {} as o on o.id = s.id_owner where s.gst_invoice_no is null order by s.id desc".format(invoice_type, owner_type))
+
 def get_filter_result(filter_type, invoice_type, **kwargs):
     id_ = kwargs.get('id_', '')
     owner_type = cf.owner_type_d[invoice_type]
@@ -137,7 +160,6 @@ def get_filter_result(filter_type, invoice_type, **kwargs):
             for a in id_list:
                 nickname_list.append(get_nickname_from_id(owner_type,a))
             owner_nickname = cf.prompt_("Enter {} Name: ".format(owner_type), nickname_list, unique_ = "existing")
-
             # owner_nickname = cf.prompt_("Enter {} Name: ".format(owner_type), cf.get_completer_list("nickname", owner_type))
         if invoice_type in ["receipt", "payment"]:
             result = cf.cursor_(sql.SQL("select r.id, r.date_, c.name, r.amount from {} as r join {} as c on c.id = r.id_owner where c.nickname = %s").format(sql.Identifier(invoice_type), sql.Identifier(owner_type)), arguments=(owner_nickname,))

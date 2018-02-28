@@ -10,7 +10,8 @@ import os
 from sys import platform
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
-pdf_dir = os.path.join(project_dir, "invoices")
+pdf_dir = os.path.join(project_dir, "temp_")
+pdf_dir = os.path.join(pdf_dir, "invoices")
 font_dir = os.path.join(project_dir, "fonts")
 font_path = os.path.join(font_dir, "DroidSans.ttf")
 # font_path = os.path.join(font_dir, "CarroisGothic-Regular.ttf")

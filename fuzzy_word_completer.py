@@ -15,18 +15,20 @@ __all__ = (
 
 class WordCompleter(Completer):
     def __init__(self, words, ignore_case=False, meta_dict=None, WORD=False,
-                 sentence=False, match_middle=False, no_of_sugg=30, invoice_list = None, invoice_type =None, meta_dict_two = None ):
+                 sentence=False, match_middle=False, no_of_sugg=30, invoice_type =None, **kwargs ):
         assert not (WORD and sentence)
-
         self.words = list(words)
         self.ignore_case = ignore_case
         self.meta_dict = meta_dict or {}
-        self.meta_dict_two =  meta_dict_two or {}
+        # self.meta_dict_two =  meta_dict_two or {}
         self.WORD = WORD
         self.sentence = sentence
         self.match_middle = match_middle
         self.no_of_sugg = no_of_sugg
-        self.invoice_list = invoice_list
+        self.invoice_list = kwargs.get('invoice_list', '')
+        self.invoice_dict = kwargs.get('invoice_dict', {})
+        self.estimate_list = kwargs.get('estimate_list', '')
+        self.estimate_dict = kwargs.get('estimate_dict', {})
         assert all(isinstance(w, string_types) for w in self.words)
 
     def get_completions(self, document, complete_event):
@@ -39,10 +41,16 @@ class WordCompleter(Completer):
         if self.ignore_case:
             word_before_cursor = word_before_cursor.lower()
 
-        if word_before_cursor.startswith("/"):
+        if word_before_cursor.startswith("\\"):
             if self.invoice_list:
                 for a in self.invoice_list:
-                    display_meta = self.meta_dict_two.get(str(a), '')
+                    display_meta = self.invoice_dict.get(str(a), '')
+                    yield Completion("\\" +  str(a), -len(word_before_cursor), display_meta=display_meta)
+        elif word_before_cursor.startswith("/"):
+            # print('reached here')
+            if self.estimate_list:
+                for a in self.estimate_list:
+                    display_meta = self.estimate_dict.get(str(a), '')
                     yield Completion("/" +  str(a), -len(word_before_cursor), display_meta=display_meta)
         elif word_before_cursor.startswith("."):
             word_before_cursor = word_before_cursor[1:]
@@ -68,12 +76,17 @@ class WordCompleter(Completer):
 if __name__ == "__main__":
     Database.initialise(database='chip', host='localhost', user='dba_tovak')
     # invoice_list = owner.get_filter_result("Search By Nickname", invoice_type)
-    invoice_list  = owner.get_filter_result("All Invoices", "sale_invoice")
+    invoice_list  = owner.get_all_gst_invoices("sale_invoice")
+    estimate_list = owner.get_all_unsaved_invoices("sale_invoice")
     invoice_dict = {}
-    for a in invoice_list:
-        invoice_dict[str(a[0])] = "{}, {}, {}, {}".format(str(a[1]), str(a[2]), str(a[3]), str(a[4]))
+    estimate_dict = {}
 
-    completer = WordCompleter(["Connection Pipe 18", "Connection Wired 18", "Connection PVC Heavy 18", "Connection PVC Heavy 24"],sentence=True, match_middle=True, ignore_case=True, invoice_list=[*invoice_dict], meta_dict_two=invoice_dict )
+    for a in invoice_list:
+        invoice_dict[str(a[4])] = "{}, {}, {}, {}".format(str(a[0]), str(a[2]), str(a[3]), str(a[1]))
+    for a in estimate_list:
+        estimate_dict[str(a[3])] = "{}, {}, {}".format(str(a[1]), str(a[2]), str(a[0]))
+    invoice_list = [str(a[4]) for a in invoice_list]
+    completer = WordCompleter(["Connection Pipe 18", "Connection Wired 18", "Connection PVC Heavy 18", "Connection PVC Heavy 24"],sentence=True, match_middle=True, ignore_case=True, invoice_list=invoice_list, invoice_dict=invoice_dict, estimate_list=[*estimate_dict], estimate_dict=estimate_dict )
     result = prompt("Enter input: ", completer=completer)
 
     """

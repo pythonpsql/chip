@@ -19,13 +19,16 @@ import os
 
 DETAIL_VIEW = True
 project_dir = os.path.dirname(os.path.abspath(__file__))
+temp_dir = os.path.join(project_dir, "temp_")
+temp_file= os.path.join(temp_dir, "temp.txt")
+log_file= os.path.join(temp_dir, "chip.log")
 last_history_value = True
 
 quit_ = "quit"
 back_ = "back"
 # invoice_dict = {"sale": ["customer", "sale_invoice", "si_detail"], "purchase": ["vendor", "purchase_invoice", "pi_detail"]}
 # style = style_from_dict({ Token.Toolbar: '#ffffff bg:#333333', })
-logging.basicConfig(filename="chip.log", format="%(message)s", level = logging.DEBUG)
+logging.basicConfig(filename=log_file, format="%(message)s", level = logging.DEBUG)
 
 color_one = colored.fg("green")
 
@@ -86,12 +89,12 @@ def get_filtered_completer(property_, table_, where_property, where_value):
 
 def prompt_dict(display_text, dict_, **kwargs):
     list_ = kwargs.get('list_','')
-    invoice_list = kwargs.get('invoice_list','')
-    meta_dict_two=kwargs.get('meta_dict_two','')
+    # invoice_list = kwargs.get('invoice_list','')
+    # meta_dict_two=kwargs.get('meta_dict_two','')
     if not list_:
         list_ = [*dict_]
-    history_file = ('temp.txt')
-    completer = WordCompleter(list_, ignore_case=True, sentence=True, match_middle=True, meta_dict=dict_, invoice_list=invoice_list, meta_dict_two=meta_dict_two)
+    history_file = (temp_file)
+    completer = WordCompleter(list_, ignore_case=True, sentence=True, match_middle=True, meta_dict=dict_, **kwargs )
     prompt_fragments = [
             ('class:title', display_text)
             ]
