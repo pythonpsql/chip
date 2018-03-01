@@ -49,6 +49,22 @@ class Product():
         except Exception as e:
             print(e)
 
+def ask_cost():
+    return cf.prompt_("Enter cost: ", [], empty_='yes')
+
+def get_previous_cost(id_product):
+    return cf.psql_("select cost from product where id = %s", arg_= (id_product, ))
+
+def update_cost_in_product(id_product, cost):
+    cf.psql_("update product set cost = %s where id = %s", arg_=(cost, id_product))
+
+def get_product_cost(id_product):
+    previous_cost = get_previous_cost(id_product)
+    if previous_cost[0][0]:
+        return previous_cost[0][0]
+    else:
+        return None
+
 def get_product_name_from_id(id_):
     with conn() as cursor:
         cursor.execute("select name from product where id = %s",(id_, ))

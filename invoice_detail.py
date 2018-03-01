@@ -73,18 +73,8 @@ def get_new_invoice_detail_by_product(invoice_, product_name, product_qty):
     return invoice_detail_
 
 
-def ask_cost():
-    return cf.prompt_("Enter cost: ", [], empty_='yes')
 
-def update_cost_in_product(id_product, cost):
-    cf.psql_("update product set cost = %s where id = %s", arg_=(cost, id_product))
 
-def get_product_cost(id_product):
-    previous_cost = get_previous_cost(id_product)
-    if previous_cost[0][0]:
-        return previous_cost[0][0]
-    else:
-        return None
 
 def update_cost_in_si_detail(invoice_detail_, product_cost):
     cost_sub_total = (Decimal(product_cost) * Decimal(invoice_detail_.product_qty)).quantize(Decimal("1.00"))
@@ -92,19 +82,14 @@ def update_cost_in_si_detail(invoice_detail_, product_cost):
     cf.psql_("update si_detail set (product_cost, cost_sub_total) = (%s, %s) where id = %s", arg_=(product_cost, cost_sub_total, invoice_detail_.id))
 
 def set_product_cost(invoice_detail_):
-    product_cost = get_product_cost(invoice_detail_.product_id)
+    product_cost = product.get_product_cost(invoice_detail_.product_id)
     if not product_cost:
         product.get_buy_rate(invoice_detail_.product_name)
-        product_cost = ask_cost()
+        product_cost = product.ask_cost()
         if not product_cost:
             return
-        update_cost_in_product(invoice_detail_.product_id, product_cost)
+        product.update_cost_in_product(invoice_detail_.product_id, product_cost)
     update_cost_in_si_detail(invoice_detail_, product_cost)
-
-
-def get_previous_cost(id_product):
-    return cf.psql_("select cost from product where id = %s", arg_= (id_product, ))
-
 
 def get_existing_invoice_detail_by_id(invoice_, id_):
     invoice_detail_ = InvoiceDetail(invoice_)

@@ -27,7 +27,7 @@ commands_list = [*commands_dict]
 comm_completer = WordCompleter(commands_list, meta_dict=commands_dict)
 
 #command_ = prompt("Enter command: ", history=FileHistory('command_history.txt'), auto_suggest = AutoSuggestFromHistory())
-starting_list = ['v','va','vp', 'eq', 'er', 'ed', 'egn', 'p', 'pg', 'del', 'set_bn_rates', 'set_ex_rates', 'delete', 'save', 'pack','makegst', 'cash_r', 'invoice_r', 'unpack', 'packed', 'unpacked', 'pack_n','date', 'set_owner_number', 'set_gst_invoice_number', 'cash_memo', 'credit_memo', 'set_gst_name']
+starting_list = ['v', 'va','vp', 'eq', 'er', 'ed', 'egn', 'p', 'pg', 'del', 'set_bn_rates', 'set_ex_rates', 'delete', 'save', 'pack','makegst', 'cash_r', 'invoice_r', 'unpack', 'packed', 'unpacked', 'pack_n', 'date', 'set_owner_gst_number', 'set_gst_invoice_number', 'cash_memo', 'credit_memo', 'set_gst_name']
 startswith_list = ['fr ', 'lr ', 'bn ', ',', 'ex ', 'pr ']
 
 def sandbox(id_owner, owner_product):
@@ -340,7 +340,7 @@ def starting_command( input_, invoice_):
         invoice_.edit_property("date_")
         result = invoice_.fetch_invoice_details()
         invoice_.view_invoice_details(result)
-    if input_ == "set_owner_number":
+    if input_ == "set_owner_gst_number":
         invoice_.owner.set_gst_number()
     if input_ == "set_gst_name":
         invoice_.owner.set_gst_name()

@@ -61,8 +61,6 @@ class BarrelNipple():
             cursor.execute(sql.SQL("update {} set (timestamp_) = (%s) where id_owner = %s and id_product = %s and rate = %s").format(sql.Identifier(self.owner_product)), ( rate_date, self.id_owner, self.id_product, self.rate))
         cf.print_('Updated owner_product timestamp_')
 
-
-
     def get_previous_rate(self, **kwargs):
         gst_ = kwargs.get('gst_')
         gst_result = cf.execute_("select gst_rate from {} where id_product = %s and id_owner = %s order by timestamp_ desc", [self.owner_product], arg_= (self.id_product, self.id_owner), fetch_= "yes")
