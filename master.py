@@ -97,11 +97,11 @@ def update_stock(table_, saved_id_table_tuple):
     with conn() as cursor:
         cursor.execute(date_sq)
     print("Inserting {} values in stock table...".format(detail_table))
-    if detail_table = "si_detail":
+    if detail_table == "si_detail":
         sq = "insert into master.stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id_invoice in %s"
         with conn() as cursor:
             cursor.execute(sq, (saved_id_table_tuple, ))
-    elif detail_table = "pi_detail":
+    elif detail_table == "pi_detail":
         sq = "insert into master.stock (id_pi_detail, id_product, product_name, product_unit, qty_purchase, date_) select id, id_product, product_name, product_unit, product_qty, date_ from pi_detail where pi_detail.id_invoice in %s"
         with conn() as cursor:
             cursor.execute(sq, (saved_id_table_tuple, ))
