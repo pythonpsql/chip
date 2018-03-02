@@ -50,8 +50,8 @@ def chip():
             continue
         elif input_.get('arg1') in ['saved', 'unsaved']:
             if input_.get('arg1') == 'unsaved':
-                sq = 'select id, owner_name, owner_place, amount_after_freight from sale_invoice where id not in (select id_invoice from sale_transaction where id_invoice is not null)'
-                sq_purchase = 'select id, owner_name, owner_place, amount_after_freight from purchase_invoice where id not in (select id_invoice from purchase_transaction where id_invoice is not null)'
+                sq = 'select id, owner_name, owner_place, amount_after_freight from sale_invoice where id not in (select id_invoice from sale_transaction where id_invoice is not null) and gst_invoice_no is null'
+                sq_purchase = 'select id, owner_name, owner_place, amount_after_freight from purchase_invoice where id not in (select id_invoice from purchase_transaction where id_invoice is not null) and gst_invoice_no is null'
             elif input_.get('arg1') == 'saved':
                 sq = 'select id, owner_name, owner_place, amount_after_freight from sale_invoice where id in (select id_invoice from sale_transaction where id_invoice is not null)'
                 sq_purchase = 'select id, owner_name, owner_place, amount_after_freight from purchase_invoice where id in (select id_invoice from purchase_transaction where id_invoice is not null)'

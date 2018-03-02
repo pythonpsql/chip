@@ -138,7 +138,7 @@ def select_gst_invoice_id(result):
 
 def get_all_unsaved_invoices(invoice_type):
     owner_type = cf.owner_type_d[invoice_type]
-    return cf.psql_("select s.date_, o.nickname, s.amount_before_freight, s.id from {} as s join {} as o on o.id = s.id_owner where s.gst_invoice_no is null order by s.id desc".format(invoice_type, owner_type))
+    return cf.psql_("select s.date_, o.nickname, s.amount_before_freight, s.id from {} as s join {} as o on o.id = s.id_owner where s.gst_invoice_no is null  and s.id not in (select id_invoice from sale_transaction where id_invoice is not null) order by s.id desc".format(invoice_type, owner_type))
 
 def get_filter_result(filter_type, invoice_type, **kwargs):
     id_ = kwargs.get('id_', '')
