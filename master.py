@@ -87,24 +87,22 @@ def backup(**kwargs):
     return master_backup_file,  public_backup_file
 
 def update_stock(table_, saved_id_table_tuple):
-    # update si_detail date_
+    assert table_ in ["sale_invoice", "purchase_invoice"]
     if table_ == "sale_invoice":
-        date_sq = "update si_detail set date_ = ( select date_ from sale_invoice where sale_invoice.id = si_detail.id_invoice)"
-        sq = "insert into stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id_invoice in %s"
-        print('Updating date_ in si_detail...')
-        with conn() as cursor:
-            cursor.execute(date_sq)
-        print("Inserting si_detail values in stock table...")
+        detail_table = "si_detail"
+    elif table_ == "purchase_invoice":
+        detail_table = "pi_detail"
+    print('Updating date_ in {}...'.format(detail_table))
+    date_sq = "update {} as dt set date_ = (select date_ from {} as t where t.id = dt.id_invoice)".format(detail_table, table_)
+    with conn() as cursor:
+        cursor.execute(date_sq)
+    print("Inserting {} values in stock table...".format(detail_table))
+    if detail_table = "si_detail":
+        sq = "insert into master.stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id_invoice in %s"
         with conn() as cursor:
             cursor.execute(sq, (saved_id_table_tuple, ))
-
-    elif table_ == "purchase_invoice":
-        date_sq = "update pi_detail set date_ = ( select date_ from purchase_invoice where purchase_invoice.id = pi_detail.id_invoice)"
-        sq = "insert into stock (id_pi_detail, id_product, product_name, product_unit, qty_purchase, date_) select id, id_product, product_name, product_unit, product_qty, date_ from pi_detail where pi_detail.id_invoice in %s"
-        print('Updating date_ in pi_detail...')
-        with conn() as cursor:
-            cursor.execute(date_sq)
-        print("Inserting pi_detail values in stock table...")
+    elif detail_table = "pi_detail":
+        sq = "insert into master.stock (id_pi_detail, id_product, product_name, product_unit, qty_purchase, date_) select id, id_product, product_name, product_unit, product_qty, date_ from pi_detail where pi_detail.id_invoice in %s"
         with conn() as cursor:
             cursor.execute(sq, (saved_id_table_tuple, ))
 
