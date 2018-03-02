@@ -19,6 +19,7 @@ tags
 *.pgsql
 *.pyc
 custom_data.py
+custom/*
 gst_invoices/*
 fonts/some_pic.png
 *.csv
