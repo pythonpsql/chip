@@ -274,7 +274,15 @@ def get_public_totals():
     with conn() as cursor:
         cursor.execute("select sum(invoice_amount), sum(money_amount) from sale_ledger_view ")
         result = cursor.fetchone()
-    return result[0], result[1]
+        if result[0] is None:
+            result_0 = 0
+        else:
+            result_0 = result[0]
+        if result[1] is None:
+            result_1 = 0
+        else:
+            result_1 = result[1]
+    return result_0, result_1
 
 def get_master_totals():
     with conn() as cursor:
