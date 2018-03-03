@@ -87,6 +87,7 @@ def backup(**kwargs):
     return master_backup_file,  public_backup_file
 
 def update_stock(table_, saved_id_table_tuple):
+    return None
     assert table_ in ["sale_invoice", "purchase_invoice"]
     if table_ == "sale_invoice":
         detail_table = "si_detail"
@@ -98,10 +99,10 @@ def update_stock(table_, saved_id_table_tuple):
         cursor.execute(date_sq)
     print("Inserting {} values in stock table...".format(detail_table))
     if detail_table == "si_detail":
-<<<<<<< HEAD
-=======
-        # table_ = sql.SQL('master.') + sql.identifier("stock")
->>>>>>> 5bcc23706a8fd2a3ca03f355d28ce66ab4c84f0b
+# <<<<<<< HEAD
+# =======
+#         # table_ = sql.SQL('master.') + sql.identifier("stock")
+# >>>>>>> 5bcc23706a8fd2a3ca03f355d28ce66ab4c84f0b
         sq = "insert into master.stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id_invoice in %s"
         with conn() as cursor:
             cursor.execute(sq, (saved_id_table_tuple, ))

@@ -1,6 +1,5 @@
 '''
 Features required:
-    update Barrel Nipple Rate
     correct cost in product table and si_detail
     cost of Barrel Nipple, Extension, GI and pricelist items
     delete temp_vendor product when deleting master
