@@ -86,8 +86,13 @@ def command_loop(invoice_):
 
 def get_command(invoice_):
     # invoice_result = owner.get_filter_result("Unsaved Invoices", "sale_invoice")
-    invoice_list  = owner.get_all_gst_invoices("sale_invoice")
-    estimate_list = owner.get_all_unsaved_invoices("sale_invoice")
+    if invoice_.invoice_type == "sale_invoice":
+        invoice_list  = owner.get_all_gst_invoices("sale_invoice")
+        estimate_list = owner.get_all_unsaved_invoices("sale_invoice")
+    elif invoice_.invoice_type == "purchase_invoice":
+        invoice_list  = owner.get_all_gst_invoices("purchase_invoice")
+        estimate_list = owner.get_all_unsaved_invoices("purchase_invoice")
+
     invoice_dict = {}
     estimate_dict = {}
 

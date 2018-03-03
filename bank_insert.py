@@ -11,7 +11,7 @@ def insert_invoice():
         name_place = cf.prompt_("Enter debtor: ", debtors_list)
         if name_place == 's':
             break
-        date_ = cf.prompt_("Enter Date in format 'YYYY-MM-DD': ", [], default_='2018-01-')
+        date_ = cf.prompt_("Enter Date in format 'YYYY-MM-DD': ", [], default_='2018-02-')
         amount_ = cf.prompt_("Enter Amount: ", [])
         type_ = 'invoice'
         sq = "insert into bank.sale_led (type_, date_, name_place, amount) values (%s, %s, %s, %s) returning id"
@@ -27,7 +27,7 @@ def insert_receipt():
         name_place = cf.prompt_("Enter debtor: ", debtors_list)
         if name_place == 's':
             break
-        date_ = cf.prompt_("Enter Date in format 'YYYY-MM-DD': ", [], default_='2018-01-')
+        date_ = cf.prompt_("Enter Date in format 'YYYY-MM-DD': ", [], default_='2018-02-')
         amount_ = cf.prompt_("Enter Amount: ", [])
         type_ = 'receipt'
         sq = "insert into bank.sale_led (type_, date_, name_place, amount) values (%s, %s, %s, %s) returning id"
