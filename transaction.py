@@ -128,7 +128,7 @@ def get_all_balances(tr_type,   **kwargs):
 def get_ledger_result(view_, id_owner, **kwargs):
     gst_ = kwargs.get('gst_', '')
     if gst_:
-        sq = sql.SQL("select date_, gst_invoice_no, invoice_amount, money_amount, ts-tr+opening_balance, opening_balance  from {} where id_owner = %s").format(view_)
+        sq = sql.SQL("select date_, gst_invoice_no, invoice_amount, money_amount, ts-tr+gst_opening_balance, gst_opening_balance  from {} where id_owner = %s").format(view_)
     else:
         sq = sql.SQL("select date_, id_, invoice_amount, money_amount, ts-tr+opening_balance, opening_balance  from {} where id_owner = %s").format(view_)
 
@@ -139,7 +139,7 @@ def get_ledger_result(view_, id_owner, **kwargs):
 def get_ledger_result_by_date(view_, id_owner, date_, **kwargs):
     gst_ = kwargs.get('gst_', '')
     if gst_:
-        sq = sql.SQL("select date_, gst_invoice_no, invoice_amount, money_amount, ts-tr+opening_balance  from {} where id_owner = %s and date_ >= %s").format(view_)
+        sq = sql.SQL("select date_, gst_invoice_no, invoice_amount, money_amount, ts-tr+gst_opening_balance  from {} where id_owner = %s and date_ >= %s").format(view_)
     else:
         sq = sql.SQL("select date_, id_, invoice_amount, money_amount, ts-tr+opening_balance  from {} where id_owner = %s and date_ >= %s").format(view_)
     with conn() as cursor:
@@ -148,12 +148,18 @@ def get_ledger_result_by_date(view_, id_owner, date_, **kwargs):
 
 def get_opening_balance(view_, id_owner, result, **kwargs):
     date_ = kwargs.get('date_', '')
+    gst_ = kwargs.get('gst_', '')
     if not date_: return result[0][5]
-    with conn() as cursor:
-        cursor.execute(sql.SQL("select ts-tr+opening_balance from {} where id_owner = %s and date_ < %s order by date_ desc, id desc limit 1").format(view_), (id_owner, date_))
+    if gst_:
+        with conn() as cursor:
+            cursor.execute(sql.SQL("select ts-tr+gst_opening_balance from {} where id_owner = %s and date_ < %s order by date_ desc, id desc limit 1").format(view_), (id_owner, date_))
         result = cursor.fetchone()
-        print('opening balance is {}'.format(result))
-        return result[0]
+    else:
+        with conn() as cursor:
+            cursor.execute(sql.SQL("select ts-tr+opening_balance from {} where id_owner = %s and date_ < %s order by date_ desc, id desc limit 1").format(view_), (id_owner, date_))
+        result = cursor.fetchone()
+    print('opening balance is {}'.format(result))
+    return result[0]
 
 def print_ledger(result, owner_type, opening_balance):
     if owner_type == "customer": money = 'Receipt'
@@ -327,14 +333,15 @@ def ledger_operations(tr_type, **kwargs):
     # print('got_owner')
     id_owner = owner_.id
     print('got_owner_type')
-    result = get_ledger_result(view_, id_owner)
+    result = get_ledger_result(view_, id_owner, **kwargs)
     date_ = kwargs.get('date_', '')
+    gst_ = kwargs.get('gst_','')
     if date_:
         date_list = [str(e[0]) for e in result]
         date_ = cf.prompt_("Enter Starting Date: ", date_list)
-        result = get_ledger_result_by_date(view_, id_owner, date_)
+        result = get_ledger_result_by_date(view_, id_owner, date_, gst_=gst_)
     if result:
-        opening_balance = get_opening_balance(view_, id_owner,  result, date_=date_)
+        opening_balance = get_opening_balance(view_, id_owner,  result, date_=date_, gst_=gst_)
         print_ledger(result, owner_type, opening_balance)
         input_ = command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs)
         return input_

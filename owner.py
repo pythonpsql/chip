@@ -31,8 +31,8 @@ def get_new_owner(owner_type, **kwargs):
 
 def create_new_owner_in_db(owner_):
     cf.log_("db: create_new_owner_in_db")
-    sq = "insert into {} (name, place, nickname) values (%s, %s, %s) returning id"
-    return cf.execute_(sq, [owner_.owner_type], arg_=[owner_.name, owner_.place, owner_.nickname], fetch_="yes")
+    sq = "insert into {} (name, place, nickname, opening_balance) values (%s, %s, %s, %s) returning id"
+    return cf.execute_(sq, [owner_.owner_type], arg_=[owner_.name, owner_.place, owner_.nickname, 0], fetch_="yes")
 
 def get_existing_owner_by_nickname(owner_type, nickname):
     owner_ = Owner(owner_type)
