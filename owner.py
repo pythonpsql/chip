@@ -245,5 +245,3 @@ if __name__ == "__main__":
         n.display_basic_info()
     except Exception as e:
         print(e)
-
-
