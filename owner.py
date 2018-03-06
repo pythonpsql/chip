@@ -25,7 +25,7 @@ def get_new_owner(owner_type, **kwargs):
         owner_.nickname = cf.prompt_("Enter {} Nickname: ".format(owner_type), cf.get_completer_list("nickname", owner_type), unique_="yes")
     owner_.name = cf.prompt_("Enter {} Name: ".format(owner_type), cf.get_completer_list("name", owner_type), default_=owner_.nickname.title())
     owner_.place = cf.prompt_("Enter {} Place: ".format(owner_type), cf.get_completer_list("place", owner_type))
-    owner_.gst_name= cf.prompt_("Enter {} GST Name: ".format(owner_type), default_=owner_.name)
+    owner_.gst_name= cf.prompt_("Enter {} GST Name: ".format(owner_type),[], default_=owner_.name)
     owner_.id = create_new_owner_in_db(owner_)
     return owner_
 

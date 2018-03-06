@@ -358,7 +358,7 @@ def get_invoice_owner(invoice_, **kwargs):
     if not owner_nickname:
         owner_nickname = cf.prompt_("Enter {} nickname: ".format(invoice_.owner_type), cf.get_completer_list("nickname", invoice_.owner_type))
     owner_ = owner.get_existing_owner_by_nickname(invoice_.owner_type, owner_nickname)
-    print(owner_.gst_name)
+    # print(owner_.gst_name)
 
     if not owner_:
         owner_ = owner.get_new_owner(invoice_.owner_type, nickname=owner_nickname)
