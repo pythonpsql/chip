@@ -72,10 +72,6 @@ def get_new_invoice_detail_by_product(invoice_, product_name, product_qty):
         # set_product_cost(invoice_detail_)
     return invoice_detail_
 
-
-
-
-
 def update_cost_in_si_detail(invoice_detail_, product_cost):
     cost_sub_total = (Decimal(product_cost) * Decimal(invoice_detail_.product_qty)).quantize(Decimal("1.00"))
     print('cost_sub_total: {}'.format(cost_sub_total))

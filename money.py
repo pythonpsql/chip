@@ -8,7 +8,7 @@ import owner
 
 transaction_type = {"receipt": "sale_transaction", "payment": "purchase_transaction"}
 
-sq_properties = ['id_owner', 'date_', 'amount', 'type', 'recipient', 'medium', 'detail', 'place', 'invoice_no', 'id_transaction']
+sq_properties = ['id_owner', 'date_', 'amount', 'type', 'recipient', 'medium', 'detail', 'place', 'invoice_no', 'id_transaction', 'gst_invoice_no']
 
 
 class Money():
@@ -22,6 +22,7 @@ class Money():
             self.get_invoice_properties(**kwargs)
             print("Invoice exists and id is {}".format(self.id))
         else:
+            self.gst_invoice_no = None
             owner_nickname = kwargs.get('nickname', '')
             if not owner_nickname:
                 owner_nickname = self.ask_owner_nickname()
@@ -36,6 +37,9 @@ class Money():
                     self.recipient, self.medium, self.detail = self.get_detail()
                     if self.recipient:
                         self.id = self.create_new_invoice()
+                    make_gst_confirm = cf.prompt_("Make: ", ['y','n'], unique_="existing")
+                    if make_gst_confirm == "y":
+                        self.makegst()
                         # self.save()
         cf.log_("Finished Money __init__")
 
@@ -64,7 +68,7 @@ class Money():
         vendor_names = cf.get_completer_list("nickname", temp_)
         recipient = cf.prompt_("Enter recipient/payer: ", vendor_names, default_ = "self")
         if recipient in ["quit", "back"]: return None, None, None
-        medium = cf.prompt_("Enter medium: ", ['Transfer', 'Cash', 'Cheque', 'Bank Cash', 'Bank Cheque', 'Invoice'], empty_="yes", default_="Cash")
+        medium = cf.prompt_("Enter medium: ", ['Transfer', 'Cash', 'Cheque', 'Bank Cash', 'Bank Cheque', 'Invoice', 'Adjustment'], empty_="yes", default_="Cash")
         if medium in ["quit", "back"]: return None, None, None
         detail = cf.prompt_("Enter detail: ", [], empty_="yes")
         if detail in ["quit", "back"]: return None, None, None
@@ -82,24 +86,24 @@ class Money():
 
     def create_new_invoice(self):
         ''' insert a new record in invoice table and return id '''
-        sq = "insert into {} (date_, id_owner, amount, recipient, detail, medium) values (%s,%s, %s, %s, %s, %s) returning id"
-        return cf.execute_(sq, [self.invoice_type], arg_=(self.date_, self.id_owner, self.amount, self.recipient, self.detail, self.medium), fetch_="y")[0]
+        sq = "insert into {} (date_, id_owner, amount, recipient, detail, medium, gst_invoice_no) values (%s,%s, %s, %s, %s, %s, %s) returning id"
+        return cf.execute_(sq, [self.invoice_type], arg_=(self.date_, self.id_owner, self.amount, self.recipient, self.detail, self.medium, self.gst_invoice_no), fetch_="y")[0]
 
-    def get_invoice_no(self):
-        last_invoice_no = cf.execute_("select max({}) from {}", ["invoice_no"], table_= self.invoice_type, fetch_="y")
-        # even with fetch_, result is a tuple (None, )
-        print("last_invoice_no is {}".format(last_invoice_no))
-        # print below returns (None,) which holds True for
-        # the statement 'if last_invoice_no'
-        # print("last_invoice_no is {}.".format(last_invoice_no))
-        if last_invoice_no[0]:
-            return int((last_invoice_no[0]) + 1)
-        else:
-            invoice_no = int(1)
-                # for gst
-                # TODO: update with input_float with int compulsory, also defend for quit and back return values
-                # invoice_no = input("There are no invoices. Enter starting invoice number: ").strip()
-        return invoice_no
+    # def get_invoice_no(self):
+    #     last_invoice_no = cf.execute_("select max({}) from {}", ["invoice_no"], table_= self.invoice_type, fetch_="y")
+    #     # even with fetch_, result is a tuple (None, )
+    #     print("last_invoice_no is {}".format(last_invoice_no))
+    #     # print below returns (None,) which holds True for
+    #     # the statement 'if last_invoice_no'
+    #     # print("last_invoice_no is {}.".format(last_invoice_no))
+    #     if last_invoice_no[0]:
+    #         return int((last_invoice_no[0]) + 1)
+    #     else:
+    #         invoice_no = int(1)
+    #             # for gst
+    #             # TODO: update with input_float with int compulsory, also defend for quit and back return values
+    #             # invoice_no = input("There are no invoices. Enter starting invoice number: ").strip()
+    #     return invoice_no
 
     def fetch_invoice_details(self, **kwargs):
         master_ = kwargs.get("master_", '')
@@ -156,6 +160,7 @@ class Money():
         self.place = self.invoice_properties[6]
         self.invoice_no = self.invoice_properties[7]
         self.id_transaction = self.invoice_properties[8]
+        self.gst_invoice_no = self.invoice_properties[9]
         self.owner = owner.get_existing_owner_by_id(self.owner_type, self.id_owner)
         cf.log_("Finished Money.get_invoice_properties()")
 
@@ -167,6 +172,7 @@ class Money():
             print("No of deletions: {}".format(result[0]))
 
     def save(self):
+        # called from master.save_all_money() which ensures that gst invoices are not saved
         with conn() as cursor:
             # excl_amount not required now since this method is only called before export. It was required earlier because it was called during receipt/payment creation
             excl_amount = sql.Composed([sql.SQL('excluded.'), sql.Identifier('amount')])
@@ -175,9 +181,54 @@ class Money():
             result = cursor.fetchone()
         cf.log_("Money Transaction saved")
 
+    def gst_save(self):
+        with conn() as cursor:
+            # excl_amount not required now since this method is only called before export. It was required earlier because it was called during receipt/payment creation
+            excl_amount = sql.Composed([sql.SQL('excluded.'), sql.Identifier('amount')])
+            sq = sql.SQL("insert into {} (type, id_voucher,id_owner, date_, amount, gst_invoice_no) values (%s, %s, %s, %s, %s, %s) on conflict (id_voucher) do update set amount = {} returning id").format(sql.Identifier(transaction_type[self.invoice_type]), excl_amount)
+            cursor.execute(sq, (self.invoice_type, self.id,self.id_owner, self.date_, self.amount, self.gst_invoice_no))
+            result = cursor.fetchone()
+        cf.log_("Money Transaction saved")
+
+    def makegst(self):
+        if self.gst_invoice_no is not None:
+            print('This is already a GST Invoice')
+            return
+        try:
+            self.gst_invoice_no = get_invoice_no(self.invoice_type, gst_=True)
+            cf.psql_("update {} set gst_invoice_no = %s where id = %s returning id".format(self.invoice_type), arg_=(self.gst_invoice_no, self.id))
+            self.gst_save()
+            # gst_invoice = sql.SQL("gst.") + sql.Identifier(self.invoice_type)
+            # public_invoice = sql.SQL("public.") + sql.Identifier(self.invoice_type)
+            # joined = sql.SQL(', ').join(sql.Identifier(n) for n in sq_properties)
+            # excl_joined = sql.SQL(',').join(sql.SQL('excluded.')+sql.Identifier(n) for n in sq_properties)
+            # sq = sql.SQL("insert into {} select * from {} where id = %s on conflict(id) do update set ({}) = ({})").format(gst_invoice, public_invoice, joined, excl_joined)
+            # cf.psql_(sq, arg_=(self.id, ))
+        except Exception as e:
+            print(e)
+
 def get_date():
     date_ = cf.prompt_date("Enter Date: ", default_=cf.get_current_date_two())
     if date_ in ["quit", "back"]:
         print("Current date has been set as invoice date")
         return cf.get_current_date_two()
     return date_
+
+def get_invoice_no(invoice_type, **kwargs):
+    last_invoice_no = get_last_invoice_no_from_db(invoice_type, **kwargs)
+    print(last_invoice_no)
+    if last_invoice_no:
+        return int((last_invoice_no) + 1)
+    else:
+        return int(1)
+
+def get_last_invoice_no_from_db(invoice_type, **kwargs):
+    gst_ = kwargs.get('gst_','')
+    if gst_:
+        field_ = "gst_invoice_no"
+    else:
+        field_ = "invoice_no"
+    #TODO: lock table here and unlock after inserting in db
+    with conn() as cursor:
+        cursor.execute("select max({}) from {}".format(field_, invoice_type))
+        return cursor.fetchone()[0] # (None, ) is result when its null

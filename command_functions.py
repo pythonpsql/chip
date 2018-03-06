@@ -260,7 +260,9 @@ def starting_command( input_, invoice_):
             invoice_.save()
             print('saved')
         else:
-            print('This is a GST Invoice. It will not be saved')
+            print('This is a GST Invoice.')
+            invoice_.gst_save()
+            print('saved')
         return {"arg1": "continue"}
     if input_ == "delete":
         confirm_ = cf.prompt_("Are you sure you want to delete this invoice? (y/n):", ['y', 'n'], unique_="existing")

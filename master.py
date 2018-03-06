@@ -1,4 +1,3 @@
-
 from database import Database, CursorFromConnectionFromPool as conn
 from psycopg2 import sql
 from prettytable import PrettyTable
@@ -33,9 +32,10 @@ before_record_count = {}
 after_record_count = {}
 
 def save_all_money():
+    # saves non_gst money only
     for i in ['receipt', 'payment']:
         with conn() as cursor:
-            cursor.execute("select id from {}".format(i))
+            cursor.execute("select id from {} where gst_invoice_no is null".format(i))
             all_id = cursor.fetchall()
             for a in all_id:
                 a = a[0]
@@ -60,7 +60,6 @@ def save_invoice_as_pdf(invoice_type):
     return all_saved_invoices
 
 def backup(**kwargs):
-    # currently, both master_* and public_* are same backups
     backup_folder = os.path.join(cf.project_dir, "backup")
     backup_folder = os.path.join(backup_folder, (cf.get_current_date()).replace("/", "."))
     if not os.path.exists(backup_folder):
@@ -77,10 +76,6 @@ def backup(**kwargs):
     public_backup_file = os.path.join(backup_folder, public_backup_file_name)
     public_backup_command = 'pg_dump -Fc -U dba_tovak -d chip -h localhost -n public > ' + public_backup_file
     os.system(public_backup_command)
-    # all_saved_sale_invoices = save_invoice_as_pdf("sale_invoice")
-    # print('Saved Sale Invoices')
-    # all_saved_purchase_invoices = save_invoice_as_pdf("purchase_invoice")
-    # print('Saved Purchase Invoices')
     drop_ = kwargs.get('drop_', '')
     if drop_:
         dropbox(backup_folder)
@@ -113,29 +108,11 @@ def update_stock(table_, saved_id_table_tuple):
 
 
 def export(**kwargs):
+    only_backup = kwargs.get('only_backup', '')
     public_invoice_total, public_receipt_total = transaction.get_public_totals()
     master_invoice_total_before, master_receipt_total_before, master_opening_balance_before = transaction.get_master_totals()
-    master_backup_file,   public_backup_file = backup()
+    master_backup_file, public_backup_file = backup()
     print('finished backup')
-    only_backup = kwargs.get('only_backup', '')
-    print(only_backup)
-    if only_backup:
-        print('Only pdf of invoices. No Backup of chip or Export')
-        ask_delete = cf.prompt_("Delete all saved invoices?: ", ['y', 'n'])
-        if ask_delete == 'y':
-            result = cf.cursor_(sql.SQL("select distinct id_invoice from {}").format(sql.Identifier("sale_transaction")))
-            saved_id_list = [element for tupl in result for element in tupl if element is not None]
-            saved_id_tuple = tuple(saved_id_list)
-            if saved_id_tuple:
-                delete_saved_invoice("sale_invoice", saved_id_tuple)
-            result = cf.cursor_(sql.SQL("select distinct id_invoice from {}").format(sql.Identifier("sale_transaction")))
-            saved_id_list = [element for tupl in result for element in tupl if element is not None]
-            saved_id_tuple = tuple(saved_id_list)
-            if saved_id_tuple:
-                delete_saved_invoice("purchase_invoice", saved_id_tuple)
-            delete_public()
-            dropbox(public_backup_file)
-        return
     get_before_record_count()
     update_master()
     delete_public()
@@ -151,16 +128,6 @@ def export(**kwargs):
     print("Opening Balance: {}".format(master_opening_balance))
     print("Estimated results:\n\tInvoice Total: {}\n\tReceipt Total: {}".format(public_invoice_total+master_invoice_total_before, public_receipt_total+master_receipt_total_before))
     backup(drop_=True)
-    # dropbox(master_backup_file)
-    # backup_folder = os.path.join(cf.project_dir, "backup")
-    # temp_name = cf.get_current_timestamp().replace("/", "")
-    # temp_name = temp_name.replace(":", "")
-    # temp_name = temp_name.replace(" ", "_")
-    # master_backup_file_name = "master_schema_" + temp_name + ".pgsql"
-    # master_backup_file = os.path.join(backup_folder, master_backup_file_name)
-    # master_backup_command= 'pg_dump -Fc -U dba_tovak -d chip -h localhost -n master > ' + master_backup_file
-    # os.system(master_backup_command)
-    # dropbox(master_backup_file)
 
 
 def update_master():
@@ -170,6 +137,7 @@ def update_master():
     add_and_modify_existing("customer")
     add_and_modify_existing("vendor")
     print("Product, Customer and Vendor tables have been modified if there were any modifications")
+    # add only estimates
     saved_id_sale_tuple = add_saved("sale_invoice")
     if saved_id_sale_tuple:
         try:
@@ -206,19 +174,15 @@ def delete_public():
 
 def delete_saved_invoice(table_, saved_id_tuple):
     with conn() as cursor:
-        cursor.execute(sql.SQL("delete from {} where id in %s").format(sql.Identifier(table_)), (saved_id_tuple,))
+        cursor.execute(sql.SQL("delete from {} where id in %s and gst_invoice_no is null").format(sql.Identifier(table_)), (saved_id_tuple,))
 
 def delete_all_records(table_):
     with conn() as cursor:
-        cursor.execute(sql.SQL("delete from {}").format(sql.Identifier(table_)))
+        cursor.execute(sql.SQL("delete from {} where gst_invoice_no is null").format(sql.Identifier(table_)))
 
 def add_saved(table_):
-    # print("\n")
-    # print("Table: {}".format(table_))
     master_table = sql.SQL("master.") + sql.Identifier(table_)
     public_table = sql.SQL("public.") + sql.Identifier(table_)
-    # print("\nBefore Update")
-    # master_count, public_count = show_table_count(master_table, pt=public_table)
     if table_ in ["sale_invoice", "si_detail"]:
         transaction_table = "sale_transaction"
         if table_ == "sale_invoice":
@@ -231,10 +195,9 @@ def add_saved(table_):
             where_field = sql.Identifier("id")
         elif table_ == "pi_detail":
             where_field = sql.Identifier("id_invoice")
-    result = cf.cursor_(sql.SQL("select distinct id_invoice from {}").format(sql.Identifier(transaction_table)))
+    result = cf.cursor_(sql.SQL("select distinct id_invoice from {} where gst_invoice_no is null").format(sql.Identifier(transaction_table)))
     saved_id_list = [element for tupl in result for element in tupl if element is not None]
     saved_id_tuple = tuple(saved_id_list)
-    # print("saved is {}".format(saved_id_list))
     if saved_id_tuple:
         with conn() as cursor:
             # source: public.*
@@ -248,6 +211,7 @@ def add_saved(table_):
     # master_count, public_count=show_table_count(master_table, pt=public_table)
     return saved_id_tuple
 
+
 def add(table_):
     if before_record_count[table_][1] == 0:
         print("There are no records in public.{}".format(table_))
@@ -259,9 +223,8 @@ def add(table_):
         # target: master.*
         # source names are not visible in the update part
         joined = sql.SQL(',').join(sql.SQL('excluded.')+sql.Identifier(n) for n in properties_dict[table_])
-        sq = sql.SQL("insert into {} select * from {} returning id").format(master_table, public_table, sql.SQL(', ').join(sql.Identifier(n) for n in properties_dict[table_]), joined)
+        sq = sql.SQL("insert into {} select * from {} where gst_invoice_no is null returning id").format(master_table, public_table, sql.SQL(', ').join(sql.Identifier(n) for n in properties_dict[table_]), joined)
         cursor.execute(sq)
-
 
 def add_and_modify_existing(table_):
     master_table = sql.SQL("master.") + sql.Identifier(table_)
@@ -287,15 +250,13 @@ def show_table_count(table_):
 
 def get_before_record_count():
     global before_record_count
-    for table_,value_  in properties_dict.items():
+    for table_, value_ in properties_dict.items():
         before_record_count[table_] = show_table_count(table_)
-    # print(before_record_count)
 
 def get_after_record_count():
     global after_record_count
     for table_,value_  in properties_dict.items():
         after_record_count[table_] = show_table_count(table_)
-    # print(after_record_count)
 
 def show_summary():
     columns = ['Table','Before Master', 'After Master', 'Before Public', 'After Public']

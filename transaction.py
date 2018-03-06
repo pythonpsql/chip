@@ -15,17 +15,22 @@ import ledger_report
 
 properties = ['id', 'type', 'id_invoice', 'id_voucher', 'date_']
 
-def view(transaction_type):
+def view(transaction_type, **kwargs):
+    gst_ = kwargs.get('gst_', '')
     if transaction_type == "sale_transaction":
         m = "Receipt"
-    else:
+    elif transaction_type == "purchase_transaction":
         m = "Payment"
     columns = ['ID', 'Date','Type', 'Owner ID', 'Invoice ID', m + ' ID', ' Amount']
-    result = cf.cursor_(sql.SQL("select id,date_,type, id_owner, id_invoice, id_voucher, amount from {}").format(sql.Identifier(transaction_type)))
+    if gst_:
+        result = cf.cursor_(sql.SQL("select id, date_, type, id_owner, id_invoice, id_voucher, amount from {}").format(sql.Identifier(transaction_type)))
+    else:
+        result = cf.cursor_(sql.SQL("select id, date_, type, id_owner, gst_invoice_no, id_voucher, amount from {}").format(sql.Identifier(transaction_type)))
     cf.pretty_table_multiple_rows(columns, result)
 
 
-def view_by_nickname(transaction_type, nickname):
+def view_by_nickname(transaction_type, nickname, **kwargs):
+    gst_ = kwargs.get('gst_', '')
     if transaction_type == "sale_transaction":
         m = "Receipt"
         invoice_type = "sale_invoice"
@@ -37,8 +42,12 @@ def view_by_nickname(transaction_type, nickname):
         owner_type = "vendor"
         money_type = "payment"
     columns = ['ID', 'Date','Type', 'Invoice ID', m + ' ID', ' Amount']
-    result = cf.cursor_(sql.SQL("select t.id,t.date_,t.type, t.id_invoice, t.id_voucher, t.amount from {} as t where t.id_owner = %s").format(sql.Identifier(transaction_type)),  arguments=(owner.get_id_from_nickname(owner_type, nickname,no_create="yes"), ))
+    if gst_:
+        result = cf.cursor_(sql.SQL("select t.id,t.date_,t.type, t.id_invoice, t.id_voucher, t.amount from {} as t where t.id_owner = %s where t.gst_invoice_no is not null").format(sql.Identifier(transaction_type)),  arguments=(owner.get_id_from_nickname(owner_type, nickname,no_create="yes"), ))
+    else:
+        result = cf.cursor_(sql.SQL("select t.id,t.date_,t.type, t.id_invoice, t.id_voucher, t.amount from {} as t where t.id_owner = %s where t.gst_invoice_no is null").format(sql.Identifier(transaction_type)),  arguments=(owner.get_id_from_nickname(owner_type, nickname,no_create="yes"), ))
     cf.pretty_table_multiple_rows(columns, result)
+
 
 def get_owner(tr_type, owner_type):
     nickname = cf.prompt_("Enter {} nickname: ".format(owner_type), cf.get_completer_list("nickname", owner_type), unique_="existing")
@@ -48,10 +57,17 @@ def get_owner(tr_type, owner_type):
 
 def get_view(transaction_type, **kwargs):
     master_ = kwargs.get('master_', '')
+    gst_= kwargs.get('gst_', '')
     if transaction_type == "sale_transaction":
-        view_ = sql.Identifier("sale_ledger_view")
+        if gst_:
+            view_ = sql.Identifier("gst_sale_ledger_view")
+        else:
+            view_ = sql.Identifier("sale_ledger_view")
     elif transaction_type == "purchase_transaction":
-        view_ = sql.Identifier("purchase_ledger_view")
+        if gst_:
+            view_ = sql.Identifier("gst_purchase_ledger_view")
+        else:
+            view_ = sql.Identifier("purchase_ledger_view")
     if master_:
         view_ = sql.SQL("master.") + view_
     return view_
@@ -109,14 +125,23 @@ def get_all_balances(tr_type,   **kwargs):
     # print(pt)
     # # print(opening_balance)
 
-def get_ledger_result(view_, id_owner):
-    sq = sql.SQL("select date_, id_, invoice_amount, money_amount, ts-tr+opening_balance, opening_balance  from {} where id_owner = %s").format(view_)
+def get_ledger_result(view_, id_owner, **kwargs):
+    gst_ = kwargs.get('gst_', '')
+    if gst_:
+        sq = sql.SQL("select date_, gst_invoice_no, invoice_amount, money_amount, ts-tr+opening_balance, opening_balance  from {} where id_owner = %s").format(view_)
+    else:
+        sq = sql.SQL("select date_, id_, invoice_amount, money_amount, ts-tr+opening_balance, opening_balance  from {} where id_owner = %s").format(view_)
+
     with conn() as cursor:
         cursor.execute(sq , (id_owner, ))
         return cursor.fetchall()
 
-def get_ledger_result_by_date(view_, id_owner, date_):
-    sq = sql.SQL("select date_, id_, invoice_amount, money_amount, ts-tr+opening_balance  from {} where id_owner = %s and date_ >= %s").format(view_)
+def get_ledger_result_by_date(view_, id_owner, date_, **kwargs):
+    gst_ = kwargs.get('gst_', '')
+    if gst_:
+        sq = sql.SQL("select date_, gst_invoice_no, invoice_amount, money_amount, ts-tr+opening_balance  from {} where id_owner = %s and date_ >= %s").format(view_)
+    else:
+        sq = sql.SQL("select date_, id_, invoice_amount, money_amount, ts-tr+opening_balance  from {} where id_owner = %s and date_ >= %s").format(view_)
     with conn() as cursor:
         cursor.execute(sq , (id_owner, date_))
         return cursor.fetchall()
@@ -295,16 +320,23 @@ def get_master_totals():
 
 def ledger_operations(tr_type, **kwargs):
     owner_type = get_owner_type(tr_type, **kwargs) # customer | vendor
+    # print('got_owner_type')
     view_ = get_view(tr_type, **kwargs) # sale_ledger_view | purchase_ledger_view | master.sale_ledger_view | master.purchase_ledger_view
+    # print('got_view_')
     owner_ = get_owner(tr_type, owner_type) # owner object
+    # print('got_owner')
     id_owner = owner_.id
+    print('got_owner_type')
     result = get_ledger_result(view_, id_owner)
     date_ = kwargs.get('date_', '')
     if date_:
         date_list = [str(e[0]) for e in result]
         date_ = cf.prompt_("Enter Starting Date: ", date_list)
         result = get_ledger_result_by_date(view_, id_owner, date_)
-    opening_balance = get_opening_balance(view_, id_owner,  result, date_=date_)
-    print_ledger(result, owner_type, opening_balance)
-    input_ = command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs)
-    return input_
+    if result:
+        opening_balance = get_opening_balance(view_, id_owner,  result, date_=date_)
+        print_ledger(result, owner_type, opening_balance)
+        input_ = command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs)
+        return input_
+    else:
+        print('No result')

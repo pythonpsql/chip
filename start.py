@@ -95,6 +95,9 @@ def chip():
         elif input_.get("arg1") == "sbma":
             input_ = tr.get_all_balances("sale_transaction", master_=True)
             continue
+        elif input_.get("arg1") == "slg":
+            input_ = tr.ledger_operations("sale_transaction", gst_=True)
+            continue
         elif input_.get("arg1") == "slm":
             input_ = tr.ledger_operations("sale_transaction", master_="yes")
             continue
