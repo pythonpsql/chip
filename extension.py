@@ -66,6 +66,23 @@ class Extension():
                 with conn() as cursor:
                     cursor.execute("insert into {} (id_owner, id_product, rate, timestamp_) values (%s, %s, %s, %s) returning id".format(self.owner_product), (self.id_owner, self.id_product, self.rate, rate_date))
 
+    def update_timestamp_gst_rate(self):
+        now = datetime.datetime.now()
+        rate_date = str(datetime.datetime.today())
+        with conn() as cursor:
+            cursor.execute(sql.SQL("update {} set (timestamp_, gst_rate) = (%s, %s) where id_owner = %s and id_product = %s").format(sql.Identifier(self.owner_product)), ( rate_date, self.rate, self.id_owner, self.id_product))
+        cf.print_('Updated owner_product gst_rate and timestamp_ ')
+
+    def update_timestamp_non_gst_rate(self):
+        now = datetime.datetime.now()
+        rate_date = str(datetime.datetime.today())
+        with conn() as cursor:
+            cursor.execute(sql.SQL("update {} set (timestamp_, rate) = (%s, %s) where id_owner = %s and id_product = %s returning id").format(sql.Identifier(self.owner_product)), ( rate_date, self.rate, self.id_owner, self.id_product))
+            result = cursor.fetchall()
+            if len(result) == 0:
+                return 'fail'
+        cf.print_('Updated owner_product non_gst_rate and timestamp_ ')
+
     def get_previous_rate(self, **kwargs):
         gst_ = kwargs.get('gst_')
         gst_result = cf.execute_("select gst_rate from {} where id_product = %s and id_owner = %s order by timestamp_ desc", [self.owner_product], arg_= (self.id_product, self.id_owner), fetch_= "yes")
