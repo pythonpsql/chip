@@ -200,7 +200,7 @@ def command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs):
         invoice_type = "purchase_invoice"
         money_type = "payment"
     while True:
-        input_ = cf.prompt_("Enter Ledger Command: ", ['p', 'pi', 'pm', 'n', 'pr', 'del'], unique_="existing")
+        input_ = cf.prompt_("Enter Ledger Command: ", ['p', 'pi', 'pm', 'n','ng', 'pr', 'del'], unique_="existing")
         if input_ ==  "del":
             master.backup()
             if master_:
@@ -233,6 +233,9 @@ def command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs):
         if input_ == "n":
             print('issuing command "slm"')
             return {'arg1': 'slm'}
+        if input_ == "ng":
+            print('issuing command "slg"')
+            return {'arg1': 'slg'}
         if input_ == "p":
             ledger_report.create_(result, 'A6', owner_, opening_balance, **kwargs)
             continue
