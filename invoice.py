@@ -322,11 +322,12 @@ class Invoice():
 
     def gst_save(self):
         self.validate_before_save()
+        print(self.amount_after_gst)
         transaction_type = {"sale_invoice": "sale_transaction", "purchase_invoice": "purchase_transaction"}
         with conn() as cursor:
             joined = sql.Composed([sql.SQL('excluded.'), sql.Identifier('amount')])
             sq = sql.SQL("insert into {} (type, id_invoice,id_owner, date_, amount, gst_invoice_no) values (%s, %s, %s, %s, %s, %s) on conflict (id_invoice) do update set amount = {} returning id").format(sql.Identifier(transaction_type[self.invoice_type]), joined)
-            cursor.execute(sq, (self.invoice_type, self.id,self.owner.id, self.date_, self.amount_after_freight, self.gst_invoice_no ))
+            cursor.execute(sq, (self.invoice_type, self.id,self.owner.id, self.date_, self.amount_after_gst, self.gst_invoice_no ))
             result = cursor.fetchone()
             cf.log_(result)
 
