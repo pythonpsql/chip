@@ -241,6 +241,11 @@ owner_type_d = {
         "payment": "vendor"
         }
 
+transaction_type_d = {
+        "sale_invoice": "sale_transaction",
+        "purchase_invoice": "purchase_transaction",
+        }
+
 owner_product_from_invoice_type_d = {
         "sale_invoice": "customer_product",
         "purchase_invoice": "vendor_product"
