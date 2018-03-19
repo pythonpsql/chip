@@ -120,7 +120,8 @@ def view(invoice_type,  **kwargs):
 # def get_filter_sql(filter_type, invoice_type):
 def get_all_gst_invoices(invoice_type):
     owner_type = cf.owner_type_d[invoice_type]
-    return cf.psql_("select s.gst_invoice_no, s.date_, o.nickname, s.amount_before_freight, s.id from {} as s join {} as o on o.id = s.id_owner where s.gst_invoice_no is not null order by s.gst_invoice_no desc nulls last".format(invoice_type, owner_type))
+    transaction_type = cf.transaction_type_d[invoice_type]
+    return cf.psql_("select s.gst_invoice_no, s.date_, o.nickname, s.amount_before_freight, s.id from {} as s join {} as o on o.id = s.id_owner where s.gst_invoice_no is not null and gst_invoice_no not in (select gst_invoice_no from {} where gst_invoice_no is not null) order by s.gst_invoice_no desc nulls last".format(invoice_type, owner_type, transaction_type))
 
 def select_gst_invoice_id(result):
     # result requirement:
