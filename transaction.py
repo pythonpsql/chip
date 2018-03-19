@@ -273,8 +273,10 @@ def command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs):
 
 def view_summary():
     with conn() as cursor:
-        cursor.execute("select name, place, sum(invoice_amount)-sum(money_amount)+master.customer.opening_balance as balance, master.customer.opening_balance from master.sale_ledger_view join master.customer on master.customer.id = master.sale_ledger_view.id_owner group by name, place, customer.opening_balance order by balance desc")
+        cursor.execute("select name, place, sum(invoice_amount)-sum(money_amount)+master.customer.opening_balance as balance from master.sale_ledger_view join master.customer on master.customer.id = master.sale_ledger_view.id_owner group by name, place, customer.opening_balance order by balance desc")
         result = cursor.fetchall()
+    columns = ['name', 'place', 'balance']
+    cf.pretty_(columns, result, right_align = ['balance'])
         # ob_list = [r[3] for r in result]
         # print(ob_list)
         # print("Frist OB: {}".format(result[3]))
@@ -289,7 +291,6 @@ def view_summary():
         #     for a in result:
         #         # csv_file.write(str(a))
         #         writer.writerow(a)
-    columns = ['name', 'place', 'balance']
     right_align_columns = ['balance']
     left_align_columns = ['name', 'place']
     pt = PrettyTable(columns)

@@ -12,15 +12,18 @@ import os
 import master
 from decimal import Decimal
 import required.custom_data as custom_data
-print( custom_data.custom_state)
+
+a_t = ((1,2000,3000,4,None,9), (2,3,65, 4, 5000, 600000))
+cf.pretty_(['a', 'b', 'c', 'd', 'e', 'f'], a_t, right_align=['c', 'e'])
+
 
 # confirm_ = cf.prompt_("This", ['abc','acb', 'b'])
-Database.initialise(database='chip', host='localhost', user='dba_tovak')
-invoice_type = "sale_invoice"
-saved_id_table_tuple = (24793,)
-sq = "insert into stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id_invoice in %s"
-with conn() as cursor:
-    cursor.execute(sq, (saved_id_table_tuple, ))
+# Database.initialise(database='chip', host='localhost', user='dba_tovak')
+# invoice_type = "sale_invoice"
+# saved_id_table_tuple = (24793,)
+# sq = "insert into stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id_invoice in %s"
+# with conn() as cursor:
+#     cursor.execute(sq, (saved_id_table_tuple, ))
 # master.backup(drop_=True)
 # a = Decimal(5.50)
 # print(Decimal(a.quantize(Decimal("1"))))

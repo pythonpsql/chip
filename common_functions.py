@@ -229,6 +229,29 @@ def pretty_table_print(column_list, result, **kwargs):
     pt.add_row(result_t)
     print(pt)
 
+def pretty_(columns_, tuple_, **kwargs):
+    right_align = kwargs.get('right_align', '')
+    left_align = kwargs.get('left_align', '')
+    pt = PrettyTable(columns_)
+    new_tuple = ()
+    for a in tuple_:
+        a_new_tuple = ()
+        for ab in a:
+            # print('ab: {}'.format(ab))
+            if ab is None:
+                ab = ''
+            a_new_tuple = a_new_tuple + (str(ab),)
+            # print(a_new_tuple)
+        new_tuple = new_tuple + (a_new_tuple,)
+        # print(new_tuple)
+    for a in new_tuple:
+        # print(a)
+        pt.add_row(a)
+    pt.align = 'l'
+    for r in right_align:
+        pt.align[r] = 'r'
+    print(pt)
+
 invoice_detail_type_d = {
         "sale_invoice": "si_detail",
         "purchase_invoice": "pi_detail"
