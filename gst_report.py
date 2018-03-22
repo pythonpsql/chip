@@ -247,7 +247,7 @@ def create_(invoice_, page_size, **kwargs):
     transactor_place_p = invoice_.owner_place
     customer_details_p = invoice_.owner
     memo_type_p = invoice_.memo_type
-    print("1. {} 2. {} 3. {} 4. {} 5. {} 6 {}".format(invoice_detail_info_p, invoice_info_p, transactor_name_p, transactor_place_p, customer_details_p, memo_type_p))
+    # print("1. {} 2. {} 3. {} 4. {} 5. {} 6 {}".format(invoice_detail_info_p, invoice_info_p, transactor_name_p, transactor_place_p, customer_details_p, memo_type_p))
     invoice_no = str(invoice_.gst_invoice_no)
     # invoice_no = str(invoice_info_p[0][4])
     import os
