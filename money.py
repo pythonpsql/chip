@@ -37,7 +37,7 @@ class Money():
                     self.recipient, self.medium, self.detail = self.get_detail()
                     if self.recipient:
                         self.id = self.create_new_invoice()
-                    make_gst_confirm = cf.prompt_("Make: ", ['y','n'], unique_="existing")
+                    make_gst_confirm = cf.prompt_("Make: ", ['y','n'], unique_="existing", empty_="yes")
                     if make_gst_confirm == "y":
                         self.makegst()
                         # self.save()
