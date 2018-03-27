@@ -254,13 +254,6 @@ def command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs):
             money_ = money.Money(money_type, id_=input_, **kwargs)
             money_details = money_.fetch_invoice_details(**kwargs)
             money_.view_invoice_details(money_details)
-
-        # result = invoice_.fetch_invoice_details(master_=master_)
-        # print(len(result))
-        # if len(result) > 19:
-        #     sale_report.create_(invoice_, 'A5', master_=master_)
-        # else:
-        #     sale_report_A6.create_(invoice_, master_=master_)
     return None
 
 def view_summary():
