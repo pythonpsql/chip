@@ -1,6 +1,6 @@
 import common_functions as cf
-from decimal import Decimal, ROUND_HALF_UP
-from database import Database, CursorFromConnectionFromPool as conn
+from decimal import Decimal
+from database import CursorFromConnectionFromPool as conn
 from psycopg2 import sql
 from psycopg2.extras import execute_values
 import datetime
@@ -35,10 +35,9 @@ class BarrelNipple():
         pq_list = self.parse_input()
             # pq_list = tuple(pq_list)
             # print(pq_list)
-        invoice_detail_id = self.insert_records(pq_list)
+        self.insert_records(pq_list)
 
     def update_timestamp_non_gst_rate(self):
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         with conn() as cursor:
             cursor.execute(sql.SQL("update {} set (timestamp_, rate) = (%s, %s) where id_owner = %s and id_product = %s returning id").format(sql.Identifier(self.owner_product)), ( rate_date, self.rate, self.id_owner, self.id_product))
@@ -48,14 +47,12 @@ class BarrelNipple():
         cf.print_('Updated owner_product non_gst_rate and timestamp_ ')
 
     def update_timestamp_gst_rate(self):
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         with conn() as cursor:
             cursor.execute(sql.SQL("update {} set (timestamp_, gst_rate) = (%s, %s) where id_owner = %s and id_product = %s").format(sql.Identifier(self.owner_product)), ( rate_date, self.rate, self.id_owner, self.id_product))
         cf.print_('Updated owner_product gst_rate and timestamp_ ')
 
     def update_timestamp_(self):
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         with conn() as cursor:
             cursor.execute(sql.SQL("update {} set (timestamp_) = (%s) where id_owner = %s and id_product = %s and rate = %s").format(sql.Identifier(self.owner_product)), ( rate_date, self.id_owner, self.id_product, self.rate))
@@ -132,7 +129,6 @@ class BarrelNipple():
 
     def insert_owner_product(self, **kwargs):
         gst_ = kwargs.get('gst_', '')
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         if gst_:
             update_fail_pass = self.update_timestamp_gst_rate()
@@ -172,9 +168,7 @@ class BarrelNipple():
 
 
 def set_owner_product_rate(owner_product, id_product, id_owner, rate, **kwargs):
-    now = datetime.datetime.now()
     rate_date = str(datetime.datetime.today())
-    properties = ['id_owner', 'id_product', 'rate', 'timestamp_']
     gst_ = kwargs.get('gst_', '')
     if gst_:
         usq = "update {} set (gst_rate, timestamp_) = (%s, %s) where id_owner = %s and id_product = %s returning id".format(owner_product)

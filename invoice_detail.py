@@ -1,12 +1,9 @@
-from database import Database, CursorFromConnectionFromPool as conn
-from prompt_toolkit.contrib.completers import WordCompleter
-from prompt_toolkit import prompt
+from database import CursorFromConnectionFromPool as conn
 from psycopg2 import sql
-from prettytable import from_db_cursor, PrettyTable
 import common_functions as cf
 import pricelist_functions as plf
 import datetime
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 import product
 
 properties = ["id_invoice", "id_product",  "product_name", "product_qty", "product_unit", "product_rate", "product_discount", "product_hsn", "product_gst_rate", "sub_total", "product_print_name", "gst_amount", "product_gst_name", "packed"]
@@ -141,7 +138,6 @@ class InvoiceDetail():
 
     def __init__(self, invoice_, **kwargs):
         # Access to old invoice_detail can only be had through id since there is no other unique property
-        id_ = kwargs.get('id_', '')
         self.invoice_ = invoice_ # invoice object
         self.invoice_detail_type = cf.invoice_detail_type_d[self.invoice_.invoice_type] # si_detail | pi_detail | ...
 
@@ -170,7 +166,6 @@ class InvoiceDetail():
     def update_owner_product(self, owner_product, rate, **kwargs):
         gst_ = kwargs.get('gst_', '')
         previous_rate =get_previous_rate(self.invoice_.owner.id, owner_product, self.product_id, **kwargs)
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         if previous_rate == rate:
             with conn() as cursor:
@@ -209,7 +204,6 @@ class InvoiceDetail():
             cursor.execute(sq, (self.id, ))
             result = cursor.fetchall()
             if len(result) > 1:
-                cf.log_("There are multiple entries of {} in the current invoice".format(command_product_name))
                 return None
             else:
                 return result[0][0]

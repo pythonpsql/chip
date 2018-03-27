@@ -1,6 +1,6 @@
 import common_functions as cf
-from decimal import Decimal, ROUND_HALF_UP
-from database import Database, CursorFromConnectionFromPool as conn
+from decimal import Decimal
+from database import CursorFromConnectionFromPool as conn
 from psycopg2 import sql
 from psycopg2.extras import execute_values
 import datetime
@@ -45,7 +45,6 @@ class Extension():
         print("Extension class finished")
 
     def update_timestamp_(self):
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         with conn() as cursor:
             cursor.execute(sql.SQL("update {} set (timestamp_) = (%s) where id_owner = %s and id_product = %s and rate = %s").format(sql.Identifier(self.owner_product)), ( rate_date, self.id_owner, self.id_product, self.rate))
@@ -53,7 +52,6 @@ class Extension():
 
     def insert_owner_product(self, **kwargs):
         gst_ = kwargs.get('gst_', '')
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         if gst_:
             update_fail_pass = self.update_timestamp_gst_rate()
@@ -67,14 +65,12 @@ class Extension():
                     cursor.execute("insert into {} (id_owner, id_product, rate, timestamp_) values (%s, %s, %s, %s) returning id".format(self.owner_product), (self.id_owner, self.id_product, self.rate, rate_date))
 
     def update_timestamp_gst_rate(self):
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         with conn() as cursor:
             cursor.execute(sql.SQL("update {} set (timestamp_, gst_rate) = (%s, %s) where id_owner = %s and id_product = %s").format(sql.Identifier(self.owner_product)), ( rate_date, self.rate, self.id_owner, self.id_product))
         cf.print_('Updated owner_product gst_rate and timestamp_ ')
 
     def update_timestamp_non_gst_rate(self):
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         with conn() as cursor:
             cursor.execute(sql.SQL("update {} set (timestamp_, rate) = (%s, %s) where id_owner = %s and id_product = %s returning id").format(sql.Identifier(self.owner_product)), ( rate_date, self.rate, self.id_owner, self.id_product))
@@ -131,14 +127,13 @@ class Extension():
         return product_qty_list
 
     def update_owner_product(self):
-        now = datetime.datetime.now()
         rate_date = str(datetime.datetime.today())
         properties = ['id_owner', 'id_product', 'rate', 'timestamp_']
         if self.owner_product == "customer_product":
-            result = cf.execute_("insert into customer_product ({}) values (%s, %s, %s, %s) returning id", properties, arg_=(self.id_owner, self.id_product, self.rate,rate_date))
+            cf.execute_("insert into customer_product ({}) values (%s, %s, %s, %s) returning id", properties, arg_=(self.id_owner, self.id_product, self.rate,rate_date))
         elif self.owner_product == "vendor_product":
             print("Updating vendor_product...")
-            result = cf.execute_("insert into vendor_product ({}) values (%s, %s, %s, %s) returning id", properties, arg_=(self.id_owner, self.id_product, self.rate,rate_date))
+            cf.execute_("insert into vendor_product ({}) values (%s, %s, %s, %s) returning id", properties, arg_=(self.id_owner, self.id_product, self.rate,rate_date))
 
     def insert_records(self, t):
         if self.owner_product == "customer_product":
@@ -166,9 +161,7 @@ class Extension():
         return rate
 
 def set_owner_product_rate(owner_product, id_product, id_owner, rate, **kwargs):
-    now = datetime.datetime.now()
     rate_date = str(datetime.datetime.today())
-    properties = ['id_owner', 'id_product', 'rate', 'timestamp_']
     gst_ = kwargs.get('gst_', '')
     if gst_:
         usq = "update {} set (gst_rate, timestamp_) = (%s, %s) where id_owner = %s and id_product = %s returning id".format(owner_product)

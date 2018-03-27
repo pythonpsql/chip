@@ -1,13 +1,9 @@
-from database import Database, CursorFromConnectionFromPool as conn
-from prompt_toolkit.contrib.completers import WordCompleter
-from prompt_toolkit import prompt
-from psycopg2 import sql, IntegrityError
-from prettytable import  PrettyTable, PLAIN_COLUMNS
-from decimal import Decimal, ROUND_HALF_UP
+from database import CursorFromConnectionFromPool as conn
+from psycopg2 import sql
+from prettytable import  PrettyTable
 import common_functions as cf
 import invoice
 import money
-import invoice_detail
 import owner
 import master
 import sale_report
@@ -33,14 +29,10 @@ def view_by_nickname(transaction_type, nickname, **kwargs):
     gst_ = kwargs.get('gst_', '')
     if transaction_type == "sale_transaction":
         m = "Receipt"
-        invoice_type = "sale_invoice"
         owner_type = "customer"
-        money_type = "receipt"
     else:
         m = "Payment"
-        invoice_type = "purchase_invoice"
         owner_type = "vendor"
-        money_type = "payment"
     columns = ['ID', 'Date','Type', 'Invoice ID', m + ' ID', ' Amount']
     if gst_:
         result = cf.cursor_(sql.SQL("select t.id,t.date_,t.type, t.id_invoice, t.id_voucher, t.amount from {} as t where t.id_owner = %s where t.gst_invoice_no is not null").format(sql.Identifier(transaction_type)),  arguments=(owner.get_id_from_nickname(owner_type, nickname,no_create="yes"), ))

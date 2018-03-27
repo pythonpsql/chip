@@ -1,17 +1,14 @@
-from database import Database, CursorFromConnectionFromPool as conn
+from database import CursorFromConnectionFromPool as conn
 from psycopg2 import sql
 from prettytable import PrettyTable
 import colored
-import command_functions as cm
 import common_functions as cf
 import invoice
 import invoice_detail
 import money
 import owner
 import product
-import sale_report
 import transaction
-import money
 import os
 
 properties_dict = {
@@ -237,7 +234,7 @@ def add_and_modify_existing(table_):
         sqcu = sql.SQL("insert into {} select * from {} on conflict (id) do update set ({}) = ({}) returning id").format(master_table, public_table, sql.SQL(', ').join(sql.Identifier(n) for n in properties_dict[table_]), cu_joined)
         cursor.execute(sqcu)
     # delete master.customer records which are not in public.customer
-    deletions = cf.cursor_(sql.SQL("delete from {} as m where not exists (select * from {} p where m.id = p.id) returning id").format(master_table, public_table))
+    cf.cursor_(sql.SQL("delete from {} as m where not exists (select * from {} p where m.id = p.id) returning id").format(master_table, public_table))
 
 def show_table_count(table_):
     master_table = sql.SQL("master.") + sql.Identifier(table_)

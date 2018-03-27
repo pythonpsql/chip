@@ -1,7 +1,7 @@
 from database import CursorFromConnectionFromPool as conn
 from prettytable import PrettyTable
 from psycopg2 import sql
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 import colored
 import common_functions as cf
 import invoice_detail
@@ -94,7 +94,6 @@ class Invoice():
 
     def __init__(self, invoice_type,  **kwargs):
         assert invoice_type in ["sale_invoice", "purchase_invoice"]
-        master_ = kwargs.get('master_', '')
         self.invoice_type = invoice_type
 
     def set_freight(self, freight):
@@ -403,7 +402,7 @@ def create_new_invoice_in_db(invoice_):
 
 
 if __name__ == "__main__":
-    from database import Database, CursorFromConnectionFromPool as conn
+    from database import Database
     Database.initialise(database='chip', host='localhost', user='dba_tovak')
     try:
         n = get_new_invoice("sale_invoice")

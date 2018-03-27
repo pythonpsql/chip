@@ -73,8 +73,11 @@ class Owner():
 
     def set_gst_name(self):
         self.gst_name= cf.prompt_("Enter GST Owner Name for {}: ".format(self.nickname), [], default_=self.name, empty_="yes")
-        cf.psql_("update {} set gst_name = %s where id = %s".format(self.owner_type), arg_=(self.gst_name, self.id))
-        return self.gst_name
+        if self.gst_name:
+            cf.psql_("update {} set gst_name = %s where id = %s".format(self.owner_type), arg_=(self.gst_name, self.id))
+            return self.gst_name
+        else:
+            return None
 
     def edit_properties(self):
         property_ = cf.prompt_("Choose property to edit: ", sq_properties)
@@ -86,7 +89,7 @@ class Owner():
         if new_value == "back": return "back"
         if new_value:
             setattr(self, property_, new_value)
-            result = cf.cursor_(sql.SQL("update {} set {} = %s where id = %s returning {}").format(sql.Identifier(self.owner_type), sql.Identifier(property_), sql.Identifier(property_)), arguments=(new_value, self.id))
+            cf.cursor_(sql.SQL("update {} set {} = %s where id = %s returning {}").format(sql.Identifier(self.owner_type), sql.Identifier(property_), sql.Identifier(property_)), arguments=(new_value, self.id))
 
     def set_properties(self):
         self.name, self.place, self.email_address, self.preferred_transport, self.note, self.address_line_one, self.address_line_two, self.address_line_three, self.contact_one, self.contact_two, self.contact_three, self.gst_number, self.nickname, self.gst_name = cf.execute_("select {} from {} where {} = %s", sq_properties, table_=self.owner_type, where_="id", arg_=(self.id, ), fetch_="y")
@@ -108,7 +111,6 @@ class Owner():
     # used in start.py
 def view(invoice_type,  **kwargs):
     filter_type = kwargs.get('filter_type', '')
-    owner_type = cf.owner_type_d[invoice_type]
     if not filter_type:
         filter_type = get_invoice_filter_type()
     filter_result = get_filter_result(filter_type,invoice_type)
@@ -130,6 +132,7 @@ def select_gst_invoice_id(result):
     # return id of invoice
     if len(result) == 1:
         return str(result[0][4])
+    invoice_dict = {}
     for a in result:
         invoice_dict[str(a[0])] = "{}, {}, {}, {}".format(str(a[1]), str(a[2]), str(a[3]), str(a[4]))
     completer = WordCompleter([*invoice_dict], meta_dict = invoice_dict)
@@ -145,7 +148,6 @@ def get_all_unsaved_invoices(invoice_type):
         return cf.psql_("select s.date_, o.nickname, s.amount_before_freight, s.id from {} as s join {} as o on o.id = s.id_owner where s.gst_invoice_no is null  and s.id not in (select id_invoice from purchase_transaction where id_invoice is not null) order by s.id desc".format(invoice_type, owner_type))
 
 def get_filter_result(filter_type, invoice_type, **kwargs):
-    id_ = kwargs.get('id_', '')
     owner_type = cf.owner_type_d[invoice_type]
     owner_nickname = kwargs.get('nickname', '')
     if filter_type == "All Invoices":
@@ -237,7 +239,7 @@ def get_selected_invoice(result, invoice_type):
 
 
 if __name__ == "__main__":
-    from database import Database, CursorFromConnectionFromPool as conn
+    from database import Database
     Database.initialise(database='chip', host='localhost', user='dba_tovak')
     try:
         o = get_existing_owner_by_nickname("customer", "Kishor Light House")

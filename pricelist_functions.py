@@ -1,5 +1,5 @@
-from database import Database, CursorFromConnectionFromPool as conn
-from psycopg2 import sql, errorcodes
+from database import CursorFromConnectionFromPool as conn
+from psycopg2 import sql
 import common_functions as cf
 import product
 import owner
@@ -42,13 +42,11 @@ def assign_pricelist_to_product():
         if product_name == "back": return "back"
         id_product = product.get_product_details(product_name)[0]
         old_name = ''
-        old_value = ''
         with conn() as cursor:
             cursor.execute("select name, value from pricelist as pl join product_pricelist ppl on pl.id=ppl.id_pricelist where ppl.id_product = %s", (id_product, ))
             old_name_result  = cursor.fetchone()
         if old_name_result:
             old_name = old_name_result[0]
-            old_value = str(old_name_result[1])
             print("Price List Name is {}".format(old_name))
             print("You cannot edit name or value from here")
             return "back"
@@ -128,7 +126,6 @@ def set_pricelist_condition(owner_pricelist, id_owner, id_pricelist, condition):
 
 # called from start.py
 def set_pricelist_discount_for_owner(owner_type, **kwargs):
-    big_pricelist_id = get_id_pricelist_by_name("GI Fitting Big")
     reducing_pricelist_id = get_id_pricelist_by_name("GI Fitting Reducing")
     owner_pricelist = cf.owner_pricelist_from_owner_type_d[owner_type]
     id_owner = owner.get_id_from_nickname(owner_type, cf.prompt_("Enter {} Name: ".format(owner_type.title()), cf.get_completer_list("nickname", owner_type)))
@@ -151,7 +148,6 @@ def get_pricelist_discount(invoice_, id_pricelist, id_product, **kwargs):
     elbow_id = get_id_pricelist_by_name("GI Fitting Elbow")
     id_owner = invoice_.owner.id
     invoice_type = invoice_.invoice_type
-    invoice_detail_type = cf.invoice_detail_type_d[invoice_type]
     owner_pricelist = cf.owner_pricelist_from_invoice_type_d[invoice_type]
     condition = get_old_pricelist_condition(owner_pricelist, id_owner, id_pricelist)
     cf.log_("finished get_old_pricelist_condition.\nCondition is {}".format(condition))
