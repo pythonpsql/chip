@@ -8,22 +8,18 @@ Database.initialise(database='chip', host='localhost', user='dba_tovak')
 
 
 def get_starting_date():
-    starting_date = cf.prompt_("Enter starting date (e.g. 1.7.2017): ",
+    return cf.prompt_("Enter starting date (e.g. 2018-07-1): ",
                                [],
-                               default_='1.3.2018')
-    starting_date = starting_date.split(".")
-    starting_date = starting_date[2] + "-" + starting_date[1] + "\
-            -" + starting_date[0]
-    return starting_date
+                               default_='2018-07-1')
+    # starting_date = starting_date.split(".")
+    # starting_date = starting_date[2] + "-" + starting_date[1] + "-" + starting_date[0]
 
 
 def get_ending_date():
-    ending_date = cf.prompt_("Enter ending date (e.g. 31.7.2017): ",
-                             [], default_='10.3.2018')
-    ending_date = ending_date.split(".")
-    ending_date = ending_date[2] + "-" + ending_date[1] + "\
-            -" + ending_date[0]
-    return ending_date
+    return cf.prompt_("Enter ending date (e.g. 2018-07-31): ",
+                             [], default_='2018-07-12')
+    # ending_date = ending_date.split(".")
+    # ending_date = ending_date[2] + "-" + ending_date[1] + "-" + ending_date[0]
 
 
 def get_header():
@@ -78,21 +74,7 @@ def write_data(starting_date, ending_date, report_headers, report_result):
             writer = csv.writer(f)
             writer.writerow(report_headers)
             for i in report_result:
-                writer.writerow(
-                    (
-                        str(i[0]),
-                        str(i[1]),
-                        str(i[2]),
-                        str(i[3]),
-                        str(i[4]),
-                        str(i[5]),
-                        str(i[6]),
-                        str(i[7]),
-                        str(i[8]),
-                        str(i[9]),
-                        str(i[10])
-                        )
-                )
+                writer.writerow(i)
             input(" will try to open ")
             os.system('xdg-open ' + b2b_report_name)
         except Exception as e:
