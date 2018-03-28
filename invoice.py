@@ -383,7 +383,7 @@ def get_invoice_no(invoice_type, **kwargs):
         return int(1)
 
 def get_last_invoice_no_from_db(invoice_type, **kwargs):
-    gst_ = kwargs.get('gst_','')
+    gst_ = kwargs.get('gst_', '')
     if gst_:
         field_ = "gst_invoice_no"
     else:

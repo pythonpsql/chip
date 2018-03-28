@@ -14,20 +14,17 @@ def get_starting_date():
     # starting_date = starting_date.split(".")
     # starting_date = starting_date[2] + "-" + starting_date[1] + "-" + starting_date[0]
 
-
 def get_ending_date():
     return cf.prompt_("Enter ending date (e.g. 2018-07-31): ",
                              [], default_='2018-07-12')
     # ending_date = ending_date.split(".")
     # ending_date = ending_date[2] + "-" + ending_date[1] + "-" + ending_date[0]
 
-
 def get_header():
     return ['GSTIN/UIN of Recipient', 'Invoice Number', 'Invoice date',
             'Invoice Value', 'Place Of Supply', 'Reverse Charge',
             'Invoice Type', 'E-Commerce GSTIN', 'Rate',
             'Taxable Value', 'Freight']
-
 
 def get_data(starting_date, ending_date):
     report_sq = "select " \
@@ -62,10 +59,8 @@ def get_data(starting_date, ending_date):
         cursor.execute(report_sq, (ending_date, starting_date))
         return cursor.fetchall()
 
-
 def print_data(report_headers, report_result):
     cf.pretty_(report_headers, report_result)
-
 
 def write_data(starting_date, ending_date, report_headers, report_result):
     b2b_report_name = "b2b_" + starting_date + "_" + ending_date + ".csv"
@@ -80,7 +75,6 @@ def write_data(starting_date, ending_date, report_headers, report_result):
         except Exception as e:
             print(e)
 
-
 def do_():
     starting_date = get_starting_date()
     ending_date = get_ending_date()
@@ -88,6 +82,5 @@ def do_():
     report_result = get_data(starting_date, ending_date)
     print_data(report_headers, report_result)
     write_data(starting_date, ending_date, report_headers, report_result)
-
 
 do_()
