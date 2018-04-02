@@ -167,6 +167,10 @@ def print_ledger(result, owner_type, opening_balance):
     if result:
         for a in result:
             a0 = cf.reverse_date(str(a[0]))
+            if a[1] is None:
+                a1 = ''
+            else:
+                a1 = a[1]
             if a[2] is None:
                 a2 = ''
             else:
@@ -175,7 +179,7 @@ def print_ledger(result, owner_type, opening_balance):
                 a3 = ''
             else:
                 a3 = a[3]
-            pt.add_row([a0, a[1], a2, a3, a[4]])
+            pt.add_row([a0, a1, a2, a3, a[4]])
         pt.align = 'r'
         for l in left_align_columns:
             pt.align[l] = 'l'

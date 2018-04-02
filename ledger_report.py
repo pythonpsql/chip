@@ -126,8 +126,16 @@ def create_(dtd, page_size, owner_, opening_,  **kwargs):
         # c.setFillColorRGB(101,0,0)
         c.setFillColor(navy)
         date_ = cf.reverse_date(str(a[0]))
-        invoice_amount = '' if a[2] == 0 else str(a[2])
-        receipt_amount = '' if a[3] == 0 else str(a[3])
+        if a[2] in [0, None]:
+            invoice_amount = ''
+        else:
+            invoice_amount = str(a[2])
+        if a[3] in [0, None]:
+            receipt_amount = ''
+        else:
+            receipt_amount = str(a[3])
+        # invoice_amount = '' if a[2] == 0 else str(a[2])
+        # receipt_amount = '' if a[3] == 0 else str(a[3])
         c.drawRightString(w, h, date_)
         c.drawRightString(w_date, h, invoice_amount)
         c.drawRightString(w_invoice_amount, h, receipt_amount)
