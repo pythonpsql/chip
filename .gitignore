@@ -24,3 +24,4 @@ gst_invoices/*
 fonts/some_pic.png
 *.csv
 *.sql
+reload.py
