@@ -15,7 +15,7 @@ __all__ = (
 
 class WordCompleter(Completer):
     def __init__(self, words, ignore_case=False, meta_dict=None, WORD=False,
-                 sentence=False, match_middle=False, no_of_sugg=30, invoice_type =None, **kwargs ):
+                 sentence=False, match_middle=False, no_of_sugg=50, invoice_type =None, **kwargs ):
         assert not (WORD and sentence)
         self.words = list(words)
         self.ignore_case = ignore_case

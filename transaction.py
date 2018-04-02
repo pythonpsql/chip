@@ -71,7 +71,7 @@ def get_owner_type(tr_type, **kwargs):
 
 def get_a_balance(tr_type, **kwargs):
     owner_type = get_owner_type(tr_type, **kwargs) # customer | vendor
-    view_ = get_view(tr_type, **kwargs)
+    # view_ = get_view(tr_type, **kwargs)
     owner_ = get_owner(tr_type, owner_type)
     id_owner = owner_.id
     if tr_type == "sale_transaction":
@@ -141,7 +141,8 @@ def get_ledger_result_by_date(view_, id_owner, date_, **kwargs):
 def get_opening_balance(view_, id_owner, result, **kwargs):
     date_ = kwargs.get('date_', '')
     gst_ = kwargs.get('gst_', '')
-    if not date_: return result[0][5]
+    if not date_:
+        return result[0][5]
     if gst_:
         with conn() as cursor:
             cursor.execute(sql.SQL("select ts-tr+gst_opening_balance from {} where id_owner = %s and date_ < %s order by date_ desc, id desc limit 1").format(view_), (id_owner, date_))
@@ -157,26 +158,27 @@ def print_ledger(result, owner_type, opening_balance):
     if owner_type == "customer": money = 'Receipt'
     if owner_type == "vendor": money = 'Payment'
     columns = ['Date', 'id_', 'Invoice', money, 'Balance']
-    right_align_columns = ['id', 'Invoice', money, 'Balance']
+    # right_align_columns = ['id', 'Invoice', money, 'Balance']
     left_align_columns=['Date']
     pt = PrettyTable(columns)
     print('OB is {}'.format(opening_balance))
     pt.add_row(['Opening', '','','',str(opening_balance)])
     # pt.set_style(PLAIN_COLUMNS)
-    for a in result:
-        a0 = cf.reverse_date(str(a[0]))
-        if a[2] is None:
-            a2 = ''
-        else:
-            a2 = a[2]
-        if a[3] is None:
-            a3 = ''
-        else:
-            a3 = a[3]
-        pt.add_row([a0, a[1], a2, a3, a[4]])
-    pt.align = 'r'
-    for l in left_align_columns:
-        pt.align[l] = 'l'
+    if result:
+        for a in result:
+            a0 = cf.reverse_date(str(a[0]))
+            if a[2] is None:
+                a2 = ''
+            else:
+                a2 = a[2]
+            if a[3] is None:
+                a3 = ''
+            else:
+                a3 = a[3]
+            pt.add_row([a0, a[1], a2, a3, a[4]])
+        pt.align = 'r'
+        for l in left_align_columns:
+            pt.align[l] = 'l'
     # for r in right_align_columns:
     #     pt.align[r] = 'r'
     print(pt)
@@ -277,7 +279,7 @@ def view_summary():
         #         # csv_file.write(str(a))
         #         writer.writerow(a)
     right_align_columns = ['balance']
-    left_align_columns = ['name', 'place']
+    # left_align_columns = ['name', 'place']
     pt = PrettyTable(columns)
     for a in result:
         if a[2] is None:
@@ -329,10 +331,18 @@ def ledger_operations(tr_type, **kwargs):
         date_list = [str(e[0]) for e in result]
         date_ = cf.prompt_("Enter Starting Date: ", date_list)
         result = get_ledger_result_by_date(view_, id_owner, date_, gst_=gst_)
-    if result:
+    # if result:
+    try:
         opening_balance = get_opening_balance(view_, id_owner,  result, date_=date_, gst_=gst_)
         print_ledger(result, owner_type, opening_balance)
         input_ = command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs)
         return input_
-    else:
-        print('No result')
+    except Exception as e:
+        with conn() as cursor:
+            cursor.execute("select gst_opening_balance from customer where id = %s", (id_owner,))
+            result = cursor.fetchone()
+            print('opening balance is {}'.format(result))
+            print('There are no other entries for this customer')
+
+    # else:
+    #     print('No result')
