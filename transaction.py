@@ -335,14 +335,14 @@ def ledger_operations(tr_type, **kwargs):
     try:
         opening_balance = get_opening_balance(view_, id_owner,  result, date_=date_, gst_=gst_)
         print_ledger(result, owner_type, opening_balance)
-        input_ = command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs)
-        return input_
     except Exception as e:
         with conn() as cursor:
             cursor.execute("select gst_opening_balance from customer where id = %s", (id_owner,))
             result = cursor.fetchone()
             print('opening balance is {}'.format(result))
             print('There are no other entries for this customer')
+    input_ = command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs)
+    return input_
 
     # else:
     #     print('No result')
