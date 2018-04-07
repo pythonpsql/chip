@@ -53,8 +53,8 @@ def chip():
                 sq = 'select id, owner_name, owner_place, amount_after_freight from sale_invoice where id not in (select id_invoice from sale_transaction where id_invoice is not null) and gst_invoice_no is null'
                 sq_purchase = 'select id, owner_name, owner_place, amount_after_freight from purchase_invoice where id not in (select id_invoice from purchase_transaction where id_invoice is not null) and gst_invoice_no is null'
             elif input_.get('arg1') == 'saved':
-                sq = 'select id, owner_name, owner_place, amount_after_freight from sale_invoice where id in (select id_invoice from sale_transaction where id_invoice is not null)'
-                sq_purchase = 'select id, owner_name, owner_place, amount_after_freight from purchase_invoice where id in (select id_invoice from purchase_transaction where id_invoice is not null)'
+                sq = 'select id, owner_name, owner_place, amount_after_freight from sale_invoice where id in (select id_invoice from sale_transaction where id_invoice is not null) and gst_invoice_no is null'
+                sq_purchase = 'select id, owner_name, owner_place, amount_after_freight from purchase_invoice where id in (select id_invoice from purchase_transaction where id_invoice is not null) and gst_invoice_no is null'
             with conn() as cursor:
                 cursor.execute(sq)
                 result = cursor.fetchall()
@@ -164,7 +164,7 @@ def chip():
                 invoice_type = "payment"
                 owner_type = "vendor"
             with conn() as cursor:
-                cursor.execute("select r.date_, c.name, r.amount, r.medium, r.recipient, r.detail from {} as r join {} as c on c.id = r.id_owner".format(invoice_type, owner_type))
+                cursor.execute("select r.date_, c.name, r.amount, r.medium, r.recipient, r.detail from {} as r join {} as c on c.id = r.id_owner where gst_invoice_no is null order by r.date_".format(invoice_type, owner_type))
                 result = cursor.fetchall()
             column_list = ['Date', 'Name', 'Amount', 'Medium', 'Recipient', 'Detail']
             cf.pretty_table_multiple_rows(column_list, result)
