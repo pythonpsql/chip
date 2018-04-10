@@ -107,6 +107,9 @@ def chip():
         elif input_.get("arg1") == "pl":
             input_ = tr.ledger_operations("purchase_transaction")
             continue
+        elif input_.get("arg1") == "plg":
+            input_ = tr.ledger_operations("purchase_transaction", gst_=True)
+            continue
         elif input_.get("arg1") == "plm":
             input_ = tr.ledger_operations("purchase_transaction", master_="yes")
             continue
