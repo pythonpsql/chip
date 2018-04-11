@@ -94,7 +94,12 @@ class BarrelNipple():
                 rate = self.get_product_rate(size)
                 sub_total = (Decimal(qty)*Decimal(rate)).quantize(Decimal("1.00"))
                 gst_amount = (Decimal(sub_total) * Decimal(0.18) ).quantize(Decimal("1.00"))
-                t = (self.invoice_.id, id_, name,  qty, unit, rate, 7307, 18, sub_total, print_name, gst_name, gst_amount)
+                cost = product.get_product_cost(id_)
+                if self.invoice_type == "sale_invoice":
+                    t = (self.invoice_.id, id_, name,  qty, unit, rate, 7307, 18, sub_total, print_name, gst_name, gst_amount, cost)
+                else:
+                    t = (self.invoice_.id, id_, name,  qty, unit, rate, 7307, 18, sub_total, print_name, gst_name, gst_amount)
+
                 product_qty_list.append(t)
             else:
                 print("Invalid input: {}".format(a))
@@ -111,7 +116,7 @@ class BarrelNipple():
 
     def get_adjacent_data(self, ss, es, qty):
         adjacent_product_qty = []
-        allowed_sizes = [2,3,4,5,6,7,8,9,10,15,18,30]
+        allowed_sizes = [2,3,4,5,6,7,8,9,10,15,18,24,30,36]
         ss = int(ss)
         max_ = int(es)+1
         for i in range(ss, max_):
@@ -123,7 +128,7 @@ class BarrelNipple():
                 print_name = "Barrel Nipple " + name_dict[self.main_size] + " x " + str(i)
                 rate = self.get_product_rate(i)
                 sub_total = (Decimal(qty)*Decimal(rate)).quantize(Decimal("1.00"))
-                t = (self.invoice_.id, id_, name,  qty, unit, rate, 7307, 18, sub_total, print_name)
+                t = (self.invoice_.id, id_, name,  qty, unit, rate, 7307, 18, sub_total, print_name, cost)
                 adjacent_product_qty.append(t)
         return adjacent_product_qty
 
@@ -144,7 +149,7 @@ class BarrelNipple():
     def insert_records(self, t):
         if self.owner_product == "customer_product":
             with conn() as cursor:
-                execute_values(cursor, "insert into si_detail (id_invoice, id_product, product_name, product_qty, product_unit, product_rate, product_hsn, product_gst_rate, sub_total, product_print_name, product_gst_name, gst_amount) values %s", t)
+                execute_values(cursor, "insert into si_detail (id_invoice, id_product, product_name, product_qty, product_unit, product_rate, product_hsn, product_gst_rate, sub_total, product_print_name, product_gst_name, gst_amount, product_cost) values %s", t)
         if self.owner_product == "vendor_product":
             with conn() as cursor:
                 execute_values(cursor, "insert into pi_detail (id_invoice, id_product, product_name, product_qty, product_unit, product_rate, product_hsn, product_gst_rate, sub_total, product_print_name, product_gst_name, gst_amount) values %s", t)
