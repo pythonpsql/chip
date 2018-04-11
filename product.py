@@ -52,9 +52,11 @@ class Product():
 
 def ask_cost():
     cost_before_discount = cf.prompt_("Enter cost: ", [], empty_='yes')
-    discount = cf.prompt("Enter discount: ", [], empty_='yes')
+    discount = cf.prompt_("Enter discount: ", [], empty_='yes')
     if discount:
         cost = (Decimal(cost_before_discount) * Decimal(1 - discount/100)).quantize(Decimal("1.00"))
+    else:
+        cost = cost_before_discount
     return cost
 
 def get_previous_cost(id_product):

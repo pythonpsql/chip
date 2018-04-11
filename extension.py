@@ -118,11 +118,13 @@ class Extension():
                 print_name = self.product_name + " " + name_dict[size]
                 gst_name = print_name
                 rate = self.get_product_rate(name_rate_dict[size])
-                cost = product.get_product_cost(id_)
                 sub_total = (Decimal(qty)*Decimal(rate)).quantize(Decimal("1.00"))
                 gst_amount = (Decimal(sub_total) * Decimal(0.18) ).quantize(Decimal("1.00"))
                 if self.invoice_type == "sale_invoice":
-                    t = (self.invoice_.id, id_, name,  qty, unit, rate, 8481, 18, sub_total, print_name, gst_name, gst_amount, cost)
+                    cost = product.get_product_cost(id_)
+                    if cost:
+                        cost_sub_total = Decimal(Decimal(qty)*Decimal(cost)).quantize(Decimal("1.00"))
+                    t = (self.invoice_.id, id_, name,  qty, unit, rate, 8481, 18, sub_total, print_name, gst_name, gst_amount, cost, cost_sub_total)
                 else:
                     t = (self.invoice_.id, id_, name,  qty, unit, rate, 8481, 18, sub_total, print_name, gst_name, gst_amount)
                 product_qty_list.append(t)
@@ -142,7 +144,7 @@ class Extension():
     def insert_records(self, t):
         if self.owner_product == "customer_product":
             with conn() as cursor:
-                execute_values(cursor, "insert into si_detail (id_invoice, id_product, product_name, product_qty, product_unit, product_rate, product_hsn, product_gst_rate, sub_total, product_print_name, product_gst_name, gst_amount, product_cost) values %s returning id", t)
+                execute_values(cursor, "insert into si_detail (id_invoice, id_product, product_name, product_qty, product_unit, product_rate, product_hsn, product_gst_rate, sub_total, product_print_name, product_gst_name, gst_amount, product_cost, cost_sub_total) values %s returning id", t)
                 result = cursor.fetchall()
         if self.owner_product == "vendor_product":
             print("Inserting pi_detail records...")
