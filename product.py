@@ -3,6 +3,7 @@ from psycopg2 import sql
 from database import CursorFromConnectionFromPool as conn
 import pricelist_functions as plf
 from prettytable import PrettyTable
+from decimal import Decimal
 
 properties = ['id', 'name', 'unit', 'print_name', 'abbr_name', 'product_group', 'hsn', 'gst_rate', 'gst_name']
 check_name = "select {} from product where lower(name) = %s"
@@ -50,7 +51,11 @@ class Product():
             print(e)
 
 def ask_cost():
-    return cf.prompt_("Enter cost: ", [], empty_='yes')
+    cost_before_discount = cf.prompt_("Enter cost: ", [], empty_='yes')
+    discount = cf.prompt("Enter discount: ", [], empty_='yes')
+    if discount:
+        cost = (Decimal(cost_before_discount) * Decimal(1 - discount/100)).quantize(Decimal("1.00"))
+    return cost
 
 def get_previous_cost(id_product):
     return cf.psql_("select cost from product where id = %s", arg_= (id_product, ))

@@ -1,4 +1,7 @@
 import common_functions as cf
+
+
+
 # file_ = "/home/tovak/env/my_env/chips_stack/backup/today.rtf"
 # file_ = "/home/tovak/env/my_env/lib/python3.5/site_packages/pgadmin4"
 
@@ -33,3 +36,6 @@ if __name__ == "__main__":
     if os.path.exists(f):
         print(f)
     dropbox(f)
+
+
+# https://stackoverflow.com/questions/2763817/sql-update-fields-of-one-table-from-fields-of-another-one

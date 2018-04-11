@@ -65,8 +65,8 @@ def get_new_invoice_detail_by_product(invoice_, product_name, product_qty):
     invoice_detail_.packed = None
     invoice_detail_.id = create_new_invoice_detail_in_db(invoice_detail_)
     if invoice_.invoice_type == "sale_invoice":
-        pass
-        # set_product_cost(invoice_detail_)
+        # pass
+        set_product_cost(invoice_detail_)
     return invoice_detail_
 
 def update_cost_in_si_detail(invoice_detail_, product_cost):
@@ -82,6 +82,7 @@ def set_product_cost(invoice_detail_):
         if not product_cost:
             return
         product.update_cost_in_product(invoice_detail_.product_id, product_cost)
+    print("polynomial is {}".format(product_cost))
     update_cost_in_si_detail(invoice_detail_, product_cost)
 
 def get_existing_invoice_detail_by_id(invoice_, id_):
