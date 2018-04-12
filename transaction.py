@@ -41,7 +41,7 @@ def view_by_nickname(transaction_type, nickname, **kwargs):
     cf.pretty_table_multiple_rows(columns, result)
 
 
-def get_owner(tr_type, owner_type):
+def get_owner(owner_type):
     nickname = cf.prompt_("Enter {} nickname: ".format(owner_type), cf.get_completer_list("nickname", owner_type), unique_="existing")
     if nickname == "quit": return "quit", None
     owner_ = owner.get_existing_owner_by_nickname(owner_type, nickname)
@@ -72,7 +72,7 @@ def get_owner_type(tr_type, **kwargs):
 def get_a_balance(tr_type, **kwargs):
     owner_type = get_owner_type(tr_type, **kwargs) # customer | vendor
     # view_ = get_view(tr_type, **kwargs)
-    owner_ = get_owner(tr_type, owner_type)
+    owner_ = get_owner(owner_type)
     id_owner = owner_.id
     if tr_type == "sale_transaction":
         with conn() as cursor:
@@ -324,7 +324,7 @@ def ledger_operations(tr_type, **kwargs):
     # print('got_owner_type')
     view_ = get_view(tr_type, **kwargs) # sale_ledger_view | purchase_ledger_view | master.sale_ledger_view | master.purchase_ledger_view
     # print('got_view_')
-    owner_ = get_owner(tr_type, owner_type) # owner object
+    owner_ = get_owner(owner_type) # owner object
     # print('got_owner')
     id_owner = owner_.id
     print('got_owner_type')
@@ -348,5 +348,37 @@ def ledger_operations(tr_type, **kwargs):
     input_ = command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs)
     return input_
 
-    # else:
-    #     print('No result')
+def get_customer_balance(**kwargs):
+    place = kwargs.get('place', '')
+    if place:
+        with conn() as cursor:
+            cursor.execute("select name, place, sum(invoice_amount) - sum(money_amount) + master.customer.opening_balance as balance from master.sale_ledger_view join master.customer on master.customer.id = master.sale_ledger_view.id_owner where master.customer.place = %s group by name, place, customer.opening_balance order by balance desc", (place, ))
+            result = cursor.fetchall()
+    else:
+        owner_ = get_owner("customer") # owner object
+        id_owner = owner_.id
+        with conn() as cursor:
+            cursor.execute("select name, place, sum(invoice_amount) - sum(money_amount) + master.customer.opening_balance as balance from master.sale_ledger_view join master.customer on master.customer.id = master.sale_ledger_view.id_owner where master.customer.id = %s group by name, place, customer.opening_balance order by balance desc", (id_owner, ))
+            result = cursor.fetchall()
+    columns = ['name', 'place', 'balance']
+    cf.pretty_(columns, result, right_align = ['balance'])
+    right_align_columns = ['balance']
+    # left_align_columns = ['name', 'place']
+    pt = PrettyTable(columns)
+    # print(result)
+    for a in result:
+        if a[2] is None:
+            a2 = ''
+        else:
+            a2  = a[2]
+        pt.add_row([a[0], a[1], a2])
+    pt.align = 'l'
+    for r in right_align_columns:
+        pt.align[r] = 'r'
+    # print(pt)
+    # owner_type = get_owner_type(tr_type, **kwargs) # customer | vendor
+    # view_ = get_view(tr_type, **kwargs) # sale_ledger_view | purchase_ledger_view | master.sale_ledger_view | master.purchase_ledger_view
+    # owner_ = get_owner(tr_type, owner_type) # owner object
+    # id_owner = owner_.id
+    # print('got_owner_type')
+    # result = get_ledger_result(view_, id_owner, **kwargs)

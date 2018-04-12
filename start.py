@@ -41,6 +41,15 @@ def chip():
             tr.view_summary()
             input_ = None
             continue
+        elif input_.get("arg1") == "slmp":
+            place = cf.prompt_("Enter place: ", cf.get_completer_list("place", "customer"), existing_="yes")
+            tr.get_customer_balance(place=place)
+            input_ = None
+            continue
+        elif input_.get("arg1") == "slm1":
+            tr.get_customer_balance()
+            input_ = None
+            continue
         elif input_.get("arg1") == "test":
             # tr.view("sale_transaction")
             # tr.view("purchase_transaction")
