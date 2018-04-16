@@ -18,7 +18,12 @@ cf.pretty_(['a', 'b', 'c', 'd', 'e', 'f'], a_t, right_align=['c', 'e'])
 
 
 # confirm_ = cf.prompt_("This", ['abc','acb', 'b'])
-# Database.initialise(database='chip', host='localhost', user='dba_tovak')
+Database.initialise(database='chip', host='localhost', user='dba_tovak')
+
+with conn() as cursor:
+    cursor.execute("select * from {}".format("master."+"customer"))
+    result = cursor.fetchall()
+    print(result)
 # invoice_type = "sale_invoice"
 # saved_id_table_tuple = (24793,)
 # sq = "insert into stock (id_si_detail, id_product, product_name, product_unit, qty_sale, date_) select id, id_product, product_name, product_unit, product_qty, date_ from si_detail where si_detail.id_invoice in %s"
