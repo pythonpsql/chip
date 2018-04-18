@@ -124,6 +124,8 @@ class Extension():
                     cost = product.get_product_cost(id_)
                     if cost:
                         cost_sub_total = Decimal(Decimal(qty)*Decimal(cost)).quantize(Decimal("1.00"))
+                    else:
+                        cost_sub_total = 0
                     t = (self.invoice_.id, id_, name,  qty, unit, rate, 8481, 18, sub_total, print_name, gst_name, gst_amount, cost, cost_sub_total)
                 else:
                     t = (self.invoice_.id, id_, name,  qty, unit, rate, 8481, 18, sub_total, print_name, gst_name, gst_amount)

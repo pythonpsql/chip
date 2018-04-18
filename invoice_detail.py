@@ -65,7 +65,7 @@ def get_new_invoice_detail_by_product(invoice_, product_name, product_qty):
     invoice_detail_.packed = None
     invoice_detail_.id = create_new_invoice_detail_in_db(invoice_detail_)
     if invoice_.invoice_type == "sale_invoice":
-        # pass
+        # if not id_pricelist:
         set_product_cost(invoice_detail_)
     return invoice_detail_
 
