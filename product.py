@@ -53,17 +53,20 @@ class Product():
 def ask_cost():
     cost_before_discount = cf.prompt_("Enter cost: ", [], empty_='yes')
     discount = cf.prompt_("Enter discount: ", [], empty_='yes')
+    transport_cost = cf.prompt_("Enter Transport Cost: ", [], empty_='yes')
     if discount:
         cost = (Decimal(cost_before_discount) * Decimal(1 - discount/100)).quantize(Decimal("1.00"))
     else:
         cost = cost_before_discount
-    return cost
+    final_cost = cost + transport_cost
+    return cost, final_cost
 
 def get_previous_cost(id_product):
     return cf.psql_("select cost from product where id = %s", arg_= (id_product, ))
 
-def update_cost_in_product(id_product, cost):
-    cf.psql_("update product set cost = %s where id = %s", arg_=(cost, id_product))
+def update_cost_in_product(id_product, cost, final_cost):
+    timestamp_ = cf.get_current_timestamp()
+    cf.psql_("update product set (purchase_cost, cost, timestamp_) = (%s, %s,%s) where id = %s", arg_=(cost, final_cost, timestamp_, id_product))
 
 def get_product_cost(id_product):
     previous_cost = get_previous_cost(id_product)

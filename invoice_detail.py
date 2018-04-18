@@ -77,13 +77,11 @@ def update_cost_in_si_detail(invoice_detail_, product_cost):
 def set_product_cost(invoice_detail_):
     product_cost = product.get_product_cost(invoice_detail_.product_id)
     if not product_cost:
-        pass
-        # product.get_buy_rate(invoice_detail_.product_name)
-        # product_cost = product.ask_cost()
+        product.get_buy_rate(invoice_detail_.product_name)
+        product_cost, final_cost = product.ask_cost()
         if not product_cost:
-            pass
-            # return
-        # product.update_cost_in_product(invoice_detail_.product_id, product_cost)
+            return
+    product.update_cost_in_product(invoice_detail_.product_id, product_cost, final_cost)
     print("polynomial is {}".format(product_cost))
     if product_cost:
         update_cost_in_si_detail(invoice_detail_, product_cost)
