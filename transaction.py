@@ -231,11 +231,19 @@ def command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs):
                 cursor.execute(sql.SQL("update {} set opening_balance = %s where id = %s").format(owner_type), (opening_balance, owner_.id))
 
         if input_ == "n":
-            print('issuing command "slm"')
-            return {'arg1': 'slm'}
+            if tr_type == "sale_transaction":
+                print('issuing command "slm"')
+                return {'arg1': 'slm'}
+            elif tr_type == "purchase_transaction":
+                print('issuing command "plm"')
+                return {'arg1': 'plm'}
         if input_ == "ng":
-            print('issuing command "slg"')
-            return {'arg1': 'slg'}
+            if tr_type == "sale_transaction":
+                print('issuing command "slg"')
+                return {'arg1': 'slg'}
+            elif tr_type == "purchase_transaction":
+                print('issuing command "plg"')
+                return {'arg1': 'plg'}
         if input_ == "p":
             ledger_report.create_(result, 'A6', owner_, opening_balance, **kwargs)
             continue
