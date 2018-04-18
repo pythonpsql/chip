@@ -138,6 +138,7 @@ def get_ledger_result_by_date(view_, id_owner, date_, **kwargs):
         cursor.execute(sq , (id_owner, date_))
         return cursor.fetchall()
 
+
 def get_opening_balance(view_, id_owner, result, **kwargs):
     print("Note that opening balance will be 0 if there is not a single invoice or voucher")
     date_ = kwargs.get('date_', '')

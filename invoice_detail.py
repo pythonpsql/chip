@@ -83,9 +83,10 @@ def set_product_cost(invoice_detail_):
         if not product_cost:
             pass
             # return
-        product.update_cost_in_product(invoice_detail_.product_id, product_cost)
+        # product.update_cost_in_product(invoice_detail_.product_id, product_cost)
     print("polynomial is {}".format(product_cost))
-    update_cost_in_si_detail(invoice_detail_, product_cost)
+    if product_cost:
+        update_cost_in_si_detail(invoice_detail_, product_cost)
 
 def get_existing_invoice_detail_by_id(invoice_, id_):
     invoice_detail_ = InvoiceDetail(invoice_)
