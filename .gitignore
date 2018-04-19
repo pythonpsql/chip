@@ -18,6 +18,7 @@ tags
 *.log
 *.pgsql
 *.pyc
+*.7z
 *.ps    
 custom_data.py
 custom/*
