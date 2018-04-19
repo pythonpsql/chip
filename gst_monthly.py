@@ -10,13 +10,13 @@ Database.initialise(database='chip', host='localhost', user='dba_tovak')
 def get_starting_date():
     return cf.prompt_("Enter starting date (e.g. 2018-07-1): ",
                                [],
-                               default_='2018-07-1')
+                               default_='2018-03-1')
     # starting_date = starting_date.split(".")
     # starting_date = starting_date[2] + "-" + starting_date[1] + "-" + starting_date[0]
 
 def get_ending_date():
     return cf.prompt_("Enter ending date (e.g. 2018-07-31): ",
-                             [], default_='2018-07-12')
+                             [], default_='2018-03-31')
     # ending_date = ending_date.split(".")
     # ending_date = ending_date[2] + "-" + ending_date[1] + "-" + ending_date[0]
 
@@ -24,7 +24,7 @@ def get_header():
     return ['GSTIN/UIN of Recipient', 'Invoice Number', 'Invoice date',
             'Invoice Value', 'Place Of Supply', 'Reverse Charge',
             'Invoice Type', 'E-Commerce GSTIN', 'Rate',
-            'Taxable Value', 'Freight']
+            'Taxable Value', 'Freight', 'Recipient Name']
 
 def get_data(starting_date, ending_date):
     report_sq = "select " \
@@ -38,7 +38,8 @@ def get_data(starting_date, ending_date):
                      "'', " \
                      "si_detail.product_gst_rate, " \
                      "Round(sum(si_detail.sub_total),2)," \
-                     "sale_invoice.freight " \
+                     "sale_invoice.freight ," \
+                     "sale_invoice.gst_owner_name " \
                      "from sale_invoice " \
                      "join si_detail on \
                      sale_invoice.id = si_detail.id_invoice " \
@@ -53,7 +54,8 @@ def get_data(starting_date, ending_date):
                      "sale_invoice.amount_after_gst, "\
                      "si_detail.product_gst_rate, " \
                      "sale_invoice.amount_after_freight, " \
-                     "sale_invoice.freight " \
+                     "sale_invoice.freight, " \
+                     "sale_invoice.gst_owner_name " \
                      "order by sale_invoice.gst_invoice_no"
     with CursorFromConnectionFromPool() as cursor:
         cursor.execute(report_sq, (ending_date, starting_date))
