@@ -18,6 +18,7 @@ tags
 *.log
 *.pgsql
 *.pyc
+*.ps    
 custom_data.py
 custom/*
 gst_invoices/*
