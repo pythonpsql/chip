@@ -59,6 +59,7 @@ def ask_cost():
     else:
         cost = cost_before_discount
     final_cost = cost + transport_cost
+    print('finishing ask_cost...')
     return cost, final_cost
 
 def get_previous_cost(id_product):

@@ -64,9 +64,12 @@ def get_new_invoice_detail_by_product(invoice_, product_name, product_qty):
     invoice_detail_.sub_total = invoice_detail_.get_sub_total()
     invoice_detail_.packed = None
     invoice_detail_.id = create_new_invoice_detail_in_db(invoice_detail_)
+    cf.log_('done here')
     if invoice_.invoice_type == "sale_invoice":
+        cf.log_('starting cost')
         # if not id_pricelist:
         set_product_cost(invoice_detail_)
+        cf.log_('cost ended')
     return invoice_detail_
 
 def update_cost_in_si_detail(invoice_detail_, product_cost):
@@ -79,9 +82,10 @@ def set_product_cost(invoice_detail_):
     if not product_cost:
         product.get_buy_rate(invoice_detail_.product_name)
         product_cost, final_cost = product.ask_cost()
+        print("set_product_cost")
         if not product_cost:
             return
-    product.update_cost_in_product(invoice_detail_.product_id, product_cost, final_cost)
+        product.update_cost_in_product(invoice_detail_.product_id, product_cost, final_cost)
     print("polynomial is {}".format(product_cost))
     if product_cost:
         update_cost_in_si_detail(invoice_detail_, product_cost)
