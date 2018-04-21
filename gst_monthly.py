@@ -45,8 +45,9 @@ def get_data(starting_date, ending_date):
                      sale_invoice.id = si_detail.id_invoice " \
                      "inner join customer on \
                      sale_invoice.id_owner= customer.id " \
-                     "where sale_invoice.date_ <= %s and \
-                     sale_invoice.date_ >= %s " \
+                     "where sale_invoice.date_ <= %s and" \
+                     "sale_invoice.date_ >= %s and"  \
+                     "gst_invoice_no > 0 " \
                      "group by " \
                      "customer.gst_number, " \
                      "sale_invoice.gst_invoice_no, " \

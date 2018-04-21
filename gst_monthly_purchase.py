@@ -33,7 +33,7 @@ def get_data(starting_date, ending_date):
                      "purchase_invoice.gst_invoice_no, " \
                      "to_char(purchase_invoice.date_, 'DD/MM/YYYY'), " \
                      "purchase_invoice.amount_after_gst, " \
-                     "'27-Maharashtra', " \
+                     "vendor.place, " \
                      "'N', " \
                      "'Regular', " \
                      "'', " \
@@ -46,9 +46,11 @@ def get_data(starting_date, ending_date):
                      "inner join vendor on \
                      purchase_invoice.id_owner= vendor.id " \
                      "where purchase_invoice.date_ <= %s and \
-                     purchase_invoice.date_ >= %s " \
+                     purchase_invoice.date_ >= %s and \
+                     gst_invoice_no > 0 " \
                      "group by " \
                      "vendor.gst_number, " \
+                     "vendor.place, " \
                      "purchase_invoice.gst_invoice_no, " \
                      "purchase_invoice.date_, " \
                      "purchase_invoice.amount_after_gst, "\
