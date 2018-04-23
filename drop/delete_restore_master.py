@@ -1,6 +1,6 @@
-
 import os
 import sys
+
 
 f = sys.argv[1]
 if os.path.exists(f):
@@ -25,4 +25,3 @@ if os.path.exists(f):
 else:
     print("You need to specify a valid file path to restore data from")
     print("e.g. python delete_restore_db.py <filepath>")
-
