@@ -1,3 +1,6 @@
+import sys
+print('This script has been incorporated in get_m.py and is not reduntant')
+sys.exit()
 import os
 import sys
 
