@@ -100,22 +100,15 @@ def get_all_balances(tr_type,   **kwargs):
 
 
 
-    # owner_type = get_owner_type(tr_type, **kwargs) # customer | vendor
-    # view_ = get_view(tr_type, **kwargs)
-    # with conn() as cursor:
-    #     cursor.execute("select id, name, place from {} order by name, place".format(owner_type))
-    #     all_owner_id = cursor.fetchall()
-    # pt = PrettyTable(['Name', 'Place', 'Balance'])
-    # for a in all_owner_id:
-    #     id_owner = a[0]
-    #     # print(a[1] + " " + a[2])
-    #     try:
-    #         balance = get_a_balance(tr_type, id_owner=id_owner, master_=True)
-    #         pt.add_row([a[1], a[2], round(balance, 0)])
-    #     except Exception as e:
-    #         print(e)
-    # print(pt)
-    # # print(opening_balance)
+def get_all_gst_balances(tr_type,   **kwargs):
+    if tr_type == "sale_transaction":
+        with conn() as cursor:
+            cursor.execute("select o.name,o.place, sum(coalesce(invoice_amount, 0))-sum(coalesce(money_amount, 0))+ coalesce(o.gst_opening_balance,0) as tb from gst_sale_ledger_view as slv join customer as o on o.id=slv.id_owner group by slv.id_owner, o.name, o.place, o.gst_opening_balance order by o.place, tb desc")
+            result = cursor.fetchall()
+        pt = PrettyTable(['Name', 'Place', 'Balance'])
+        for a in result:
+            pt.add_row(a)
+        print(pt)
 
 def get_ledger_result(view_, id_owner, **kwargs):
     gst_ = kwargs.get('gst_', '')
@@ -392,3 +385,30 @@ def get_customer_balance(**kwargs):
     # id_owner = owner_.id
     # print('got_owner_type')
     # result = get_ledger_result(view_, id_owner, **kwargs)
+def get_gst_customer_balance(**kwargs):
+    place = kwargs.get('place', '')
+    if place:
+        with conn() as cursor:
+            cursor.execute("select name, place, sum(coalesce(invoice_amount, 0)) - sum(coalesce(money_amount,0)) + customer.gst_opening_balance as balance from gst_sale_ledger_view join customer on customer.id = gst_sale_ledger_view.id_owner where customer.place = %s group by name, place, customer.gst_opening_balance order by balance desc", (place, ))
+            result = cursor.fetchall()
+    else:
+        owner_ = get_owner("customer") # owner object
+        id_owner = owner_.id
+        with conn() as cursor:
+            cursor.execute("select name, place, sum(invoice_amount) - sum(money_amount) + master.customer.opening_balance as balance from master.sale_ledger_view join master.customer on master.customer.id = master.sale_ledger_view.id_owner where master.customer.id = %s group by name, place, customer.opening_balance order by balance desc", (id_owner, ))
+            result = cursor.fetchall()
+    columns = ['name', 'place', 'balance']
+    cf.pretty_(columns, result, right_align = ['balance'])
+    right_align_columns = ['balance']
+    # left_align_columns = ['name', 'place']
+    pt = PrettyTable(columns)
+    # print(result)
+    for a in result:
+        if a[2] is None:
+            a2 = ''
+        else:
+            a2  = a[2]
+        pt.add_row([a[0], a[1], a2])
+    pt.align = 'l'
+    for r in right_align_columns:
+        pt.align[r] = 'r'

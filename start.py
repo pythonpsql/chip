@@ -46,6 +46,11 @@ def chip():
             tr.get_customer_balance(place=place)
             input_ = None
             continue
+        elif input_.get("arg1") == "slgp":
+            place = cf.prompt_("Enter place: ", cf.get_completer_list("place", "customer"), existing_="yes")
+            tr.get_gst_customer_balance(place=place)
+            input_ = None
+            continue
         elif input_.get("arg1") == "slm1":
             tr.get_customer_balance()
             input_ = None
@@ -103,6 +108,9 @@ def chip():
             continue
         elif input_.get("arg1") == "sbma":
             input_ = tr.get_all_balances("sale_transaction", master_=True)
+            continue
+        elif input_.get("arg1") == "sbga":
+            input_ = tr.get_all_gst_balances("sale_transaction")
             continue
         elif input_.get("arg1") == "slg":
             input_ = tr.ledger_operations("sale_transaction", gst_=True)
