@@ -177,9 +177,10 @@ def create_(invoice_, page_size, **kwargs):
     # read as number of print
     if do_not_open_preview:
         return None
+    pdf_file_name =  "\"" + pdf_file_name + "\""
     if not no_of_print:
         if platform == "linux" or platform == "linux2":
-            os.system('xdg-open ' + '\"'+ pdf_file_name + '\"')
+            os.system('xdg-open ' + pdf_file_name )
         elif platform == "darwin":
             os.system('open ' + pdf_file_name)
     else:
