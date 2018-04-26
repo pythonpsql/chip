@@ -104,7 +104,11 @@ if __name__ == "__main__":
     delete_master()
     master_file = select_file(date_by_dot, type_='master')
     restore_file(master_file)
-    delete_public()
-    create_empty_public()
-    public_file = select_file(date_by_dot, type_='public')
-    restore_file(public_file)
+    restore_public = cf.prompt_("Do you want to restore public?: ", ["y", "n"], unique_="existing")
+    if restore_public == "y":
+        delete_public()
+        create_empty_public()
+        public_file = select_file(date_by_dot, type_='public')
+        restore_file(public_file)
+    else:
+        print("Only master file was restored")
