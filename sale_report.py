@@ -85,7 +85,8 @@ def header_(c, invoice_, height):
 def create_(invoice_, page_size, **kwargs):
     master_= kwargs.get('master_', '')
     dtd = invoice_.fetch_invoice_details(master_=master_)
-    pdf_file_name = os.path.join(pdf_dir, str(invoice_.id) + ".pdf")
+    temp_some_ = str(invoice_.owner_name)  + str(invoice_.id) + "(" + str(invoice_.amount_after_freight)+ ")"+ "__"
+    pdf_file_name = os.path.join(pdf_dir, temp_some_ + ".pdf")
     # print('dtd is {}'.format(dtd))
     margin = 0.5*units.cm
     if page_size == 'A5':
@@ -172,10 +173,13 @@ def create_(invoice_, page_size, **kwargs):
         c.drawRightString(40 , 10, "Page: " + str(page_count))
     c.save()
     no_of_print = kwargs.get('no_of_print', '')
+    do_not_open_preview = kwargs.get('do_not_open_preview', '')
     # read as number of print
+    if do_not_open_preview:
+        return None
     if not no_of_print:
         if platform == "linux" or platform == "linux2":
-            os.system('xdg-open ' + pdf_file_name)
+            os.system('xdg-open ' + '\"'+ pdf_file_name + '\"')
         elif platform == "darwin":
             os.system('open ' + pdf_file_name)
     else:

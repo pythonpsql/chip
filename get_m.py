@@ -16,7 +16,8 @@ def get_date():
     elif get_date == 'other':
         while True:
             the_date = cf.prompt_("Enter date: ", [], default_=str(today))
-            confirm_ = cf.prompt_("Confirm date {} (y/n): ".format(the_date), [])
+            confirm_ = 'y'
+            # confirm_ = cf.prompt_("Confirm date {} (y/n): ".format(the_date), [])
             if confirm_ == "y":
                 break
     print(the_date)
@@ -48,7 +49,8 @@ def backup():
 def delete_public():
     delete_command = "psql -U dba_tovak -d chip -h localhost -c 'drop schema public cascade'"
     print(delete_command)
-    confirm_ = input("Do you want to execute the above command? (y/n)").strip().lower()
+    # confirm_ = input("Do you want to execute the above command? (y/n)").strip().lower()
+    confirm_ = 'y'
     if confirm_ == "y":
         os.system(delete_command)
     else:
@@ -62,7 +64,8 @@ def create_empty_public():
 def delete_master():
     delete_command = "psql -U dba_tovak -d chip -h localhost -c 'drop schema master cascade'"
     print(delete_command)
-    confirm_ = input("Do you want to execute the above command? (y/n)").strip().lower()
+    confirm_ = 'y'
+    # confirm_ = input("Do you want to execute the above command? (y/n)").strip().lower()
     if confirm_ == "y":
         os.system(delete_command)
     else:
@@ -80,7 +83,8 @@ def select_file(the_date, type_):
 def restore_file(file_):
     restore_command = "pg_restore -U dba_tovak -h localhost -d chip " + file_
     print(restore_command)
-    confirm_ = input("Do you want to execute the above command? (y/n)").strip().lower()
+    # confirm_ = input("Do you want to execute the above command? (y/n)").strip().lower()
+    confirm_ = 'y'
     if confirm_ == "y":
         os.system(restore_command)
         print("{} restored".format(file_))
