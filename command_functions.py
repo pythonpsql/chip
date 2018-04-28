@@ -1,14 +1,10 @@
-from database import Database, CursorFromConnectionFromPool as conn
+from database import  CursorFromConnectionFromPool as conn
 from psycopg2 import sql
 from prompt_toolkit.contrib.completers import WordCompleter
-from prompt_toolkit.history import FileHistory
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit import prompt
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from prettytable import PrettyTable
 import colored
 import common_functions as cf
-import pricelist_functions as plf
 import owner
 import invoice
 import product
@@ -27,7 +23,7 @@ commands_list = [*commands_dict]
 comm_completer = WordCompleter(commands_list, meta_dict=commands_dict)
 
 #command_ = prompt("Enter command: ", history=FileHistory('command_history.txt'), auto_suggest = AutoSuggestFromHistory())
-starting_list = ['v', 'va','vp', 'eq', 'er', 'ed', 'egn', 'p', 'pg', 'del', 'set_bn_rates', 'set_ex_rates', 'delete', 'save', 'pack','makegst', 'cash_r', 'invoice_r', 'unpack', 'packed', 'unpacked', 'pack_n', 'date', 'set_owner_gst_number', 'set_gst_invoice_number', 'cash_memo', 'credit_memo', 'set_gst_name']
+starting_list = ['v', 'va','vp', 'eq', 'er', 'ed', 'egn', 'p', 'pg', 'tg', 'tgm', 'tgdetails', 'del', 'set_bn_rates', 'set_ex_rates', 'delete', 'save', 'pack','makegst', 'cash_r', 'invoice_r', 'unpack', 'packed', 'unpacked', 'pack_n', 'date', 'set_owner_gst_number', 'set_gst_invoice_number', 'cash_memo', 'credit_memo', 'set_gst_name']
 startswith_list = ['fr ', 'lr ', 'bn ', ',', 'ex ', 'pr ']
 
 def sandbox(id_owner, owner_product):
@@ -172,7 +168,7 @@ def starting_command( input_, invoice_):
         sq= "update {} set id_invoice = %s  where id_invoice = %s and packed is not null returning id"
         with conn() as cursor:
             cursor.execute(sq.format(detail_table), (new_invoice.id, invoice_.id, ))
-            delete_list = cursor.fetchall()
+            # delete_list = cursor.fetchall()
         new_invoice.update_invoice_with_sub_total()
         invoice_.update_invoice_with_sub_total()
     if input_ in ["makegst"]:
@@ -337,12 +333,24 @@ def starting_command( input_, invoice_):
         sale_report.create_(invoice_, 'A6')
     if input_ == "pg":
         gst_report.create_(invoice_, 'A5')
-        # result = invoice_.fetch_invoice_details()
-        # print(len(result))
-        # if len(result) > 19:
-        #     sale_report.create_(invoice_)
-        # else:
-        #     sale_report_A6.create_(invoice_)
+    if input_ == "tg":
+        sale_report.create_(invoice_, 'A6', tg='Rounak')
+    if input_ == "tgm":
+        sale_report.create_(invoice_, 'A6', tg='Madan')
+    if input_ == "tgdetails":
+        with conn() as cursor:
+            cursor.execute("select product_print_name, product_qty from si_detail where id_invoice = %s", (invoice_.id,))
+            result = cursor.fetchall()
+            print(result)
+            s = ""
+            for a in result:
+                s = s + a[0] + "-> " + str(a[1]) + "\\n"
+
+            # dict_ = dict((str(x),str(y)) for x,y in result)
+            # print(dict_)
+            # for a in dict
+            # dict_ = 'x' + '\\n' + 'y'
+        cf.send_msg_telegram(s, me=True)
     if input_ == "date":
         invoice_.edit_property("date_")
         result = invoice_.fetch_invoice_details()
@@ -407,18 +415,18 @@ def startswith_command(input_, invoice_):
     if input_.startswith('bn '):
         print('invoice_.gst_invoice_no is {}'.format(invoice_.gst_invoice_no))
         if invoice_.gst_invoice_no is None:
-            bn = barrel_nipple.BarrelNipple(input_, invoice_)
+            barrel_nipple.BarrelNipple(input_, invoice_)
         else:
-            bn = barrel_nipple.BarrelNipple(input_, invoice_, gst_=True)
+            barrel_nipple.BarrelNipple(input_, invoice_, gst_=True)
 
         invoice_.update_invoice_with_sub_total()
         invoice_.view_invoice_details(invoice_.fetch_invoice_details())
     if input_.startswith('ex '):
         print('invoice_.gst_invoice_no is {}'.format(invoice_.gst_invoice_no))
         if invoice_.gst_invoice_no is None:
-            ex = extension.Extension(input_, invoice_)
+            extension.Extension(input_, invoice_)
         else:
-            ex = extension.Extension(input_, invoice_, gst_=True)
+            extension.Extension(input_, invoice_, gst_=True)
         # after implementing init_by_id in invoice_detail, the following code can be used as starting point to see only the added Extension items
         '''
         id_result = ex.invoice_detail_id_list
@@ -438,7 +446,3 @@ def startswith_command(input_, invoice_):
         return {"arg1": input_.split(",")[1]}
     return {"arg1": "continue"}
 
-def ending_command( input_):
-    result = self.fetch_invoice_details()
-    # split input_ into command_ and product_name
-    product_name = " ".join(input_.split()[:-1])

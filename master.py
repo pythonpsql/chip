@@ -105,7 +105,7 @@ def update_stock(table_, saved_id_table_tuple):
 
 
 def export(**kwargs):
-    only_backup = kwargs.get('only_backup', '')
+    # only_backup = kwargs.get('only_backup', '')
     public_invoice_total, public_receipt_total = transaction.get_public_totals()
     master_invoice_total_before, master_receipt_total_before, master_opening_balance_before = transaction.get_master_totals()
     master_backup_file, public_backup_file = backup()
@@ -276,13 +276,13 @@ def dropbox(master_backup_file):
     compress_file_name = master_backup_file + ".7z"
     compress_ = "7z a " + compress_file_name + " " + master_backup_file +  " -p"
     print(compress_)
-    confirm_ = cf.prompt_("Do you want to run the command? (y/n): ", ['y', 'n'], default_='y', unique_='existing')
-    if confirm_ == 'n': return None
+    # confirm_ = cf.prompt_("Do you want to run the command? (y/n): ", ['y', 'n'], default_='y', unique_='existing')
+    # if confirm_ == 'n': return None
     os.system(compress_)
     dropbox_command = "cd ~/git_clones/Dropbox-Uploader/ && ./dropbox_uploader.sh upload " + compress_file_name + " " + remote_folder
     print(dropbox_command)
-    confirm_ = cf.prompt_("Do you want to run the command? (y/n): ", ['y', 'n'], default_='y', unique_='existing')
-    if confirm_ == 'n': return None
+    # confirm_ = cf.prompt_("Do you want to run the command? (y/n): ", ['y', 'n'], default_='y', unique_='existing')
+    # if confirm_ == 'n': return None
     os.system(dropbox_command)
 
 

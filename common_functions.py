@@ -4,15 +4,13 @@ from fuzzy_word_completer import WordCompleter
 from prompt_toolkit import prompt
 from prompt_toolkit.styles import Style
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.key_binding.bindings.completion import generate_completions, display_completions_like_readline
+from prompt_toolkit.key_binding.bindings.completion import generate_completions
 import colored
 
 # from prompt_toolkit.styles import style_from_dict
 from psycopg2 import sql
-from prettytable import from_db_cursor, PrettyTable
-from decimal import Decimal, ROUND_HALF_UP
+from prettytable import  PrettyTable
 import datetime
 import logging
 import os
@@ -113,11 +111,11 @@ class BackException(Exception):
 bindings = KeyBindings()
 
 @bindings.add("'")
-def _(event):
+def _1(event):
     event.current_buffer.validate_and_handle()
 
 @bindings.add(';')
-def _(event):
+def _2(event):
     generate_completions(event)
 
 @bindings.add(':')
@@ -229,9 +227,34 @@ def pretty_table_print(column_list, result, **kwargs):
     pt.add_row(result_t)
     print(pt)
 
+def send_msg_telegram(message_, me=True):
+    # print(message_)
+    # message_ = '\"msg Rounak_Jain ' + "\'"+ message_ + "\'" +'\"'
+    if me:
+        import custom.custom_data as cd
+        c1 = cd.contact1
+        message_ = '\"msg ' + c1 +  " " +  "\'"+ message_ + "\'" + '\"'
+        # command_ = 'telegram-cli -W -e "msg Rounak_Jain "'  + message_
+        print(message_)
+        command_ = 'telegram-cli -W -e ' +  message_
+        os.system(command_)
+
+def send_file_telegram(file_path, me=True):
+    import custom.custom_data as cd
+    print(file_path)
+    if me:
+        c = cd.contact1
+    else:
+        c = cd.contact2
+    message_ = '\"send_file ' + c +  " " +   '\"' + file_path
+    # command_ = 'telegram-cli -W -e "send_file Rounak_Jain "'  + file_path
+    command_ = 'telegram-cli -W -e ' + message_
+    print(command_)
+    os.system(command_)
+
 def pretty_(columns_, tuple_, **kwargs):
     right_align = kwargs.get('right_align', '')
-    left_align = kwargs.get('left_align', '')
+    # left_align = kwargs.get('left_align', '')
     pt = PrettyTable(columns_)
     new_tuple = ()
     for a in tuple_:
@@ -298,4 +321,5 @@ def clear_screen(**kwargs):
         print(msg)
 
 if __name__ == "__main__":
-    Database.initialise(database='chips_stack', host='localhost', user='dba_tovak')
+    send_msg_telegram('some', me=True)
+    # Database.initialise(database='chips_stack', host='localhost', user='dba_tovak')

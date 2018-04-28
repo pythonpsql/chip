@@ -85,7 +85,9 @@ def header_(c, invoice_, height):
 def create_(invoice_, page_size, **kwargs):
     master_= kwargs.get('master_', '')
     dtd = invoice_.fetch_invoice_details(master_=master_)
-    temp_some_ = str(invoice_.owner_name)  + str(invoice_.id) + "(" + str(invoice_.amount_after_freight)+ ")"+ "__"
+    underscored_name = invoice_.owner_name.replace(" ", "_")
+    # temp_some_ = str(invoice_.owner_name)  + str(invoice_.id) + "(" + str(invoice_.amount_after_freight)+ ")"+ "__"
+    temp_some_ =  underscored_name +  str(invoice_.id) + "(" + str(invoice_.amount_after_freight)+ ")"+ "__"
     pdf_file_name = os.path.join(pdf_dir, temp_some_ + ".pdf")
     # print('dtd is {}'.format(dtd))
     margin = 0.5*units.cm
@@ -174,10 +176,19 @@ def create_(invoice_, page_size, **kwargs):
     c.save()
     no_of_print = kwargs.get('no_of_print', '')
     do_not_open_preview = kwargs.get('do_not_open_preview', '')
+    tg = kwargs.get('tg', '')
     # read as number of print
     if do_not_open_preview:
         return None
     pdf_file_name =  "\"" + pdf_file_name + "\""
+    if tg:
+        if tg == 'Rounak':
+            cf.send_file_telegram(pdf_file_name, me=True)
+            return None
+        elif tg == 'Madan':
+            cf.send_file_telegram(pdf_file_name, me=False)
+            return None
+
     if not no_of_print:
         if platform == "linux" or platform == "linux2":
             os.system('xdg-open ' + pdf_file_name )
