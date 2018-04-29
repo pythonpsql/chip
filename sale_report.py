@@ -3,8 +3,7 @@ from reportlab.lib import units
 from reportlab.lib import pagesizes
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.colors import lightcoral, black, grey, navy
-from num2words import num2words
+from reportlab.lib.colors import navy
 import common_functions as cf
 import os
 from sys import platform
@@ -87,8 +86,24 @@ def create_(invoice_, page_size, **kwargs):
     dtd = invoice_.fetch_invoice_details(master_=master_)
     underscored_name = invoice_.owner_name.replace(" ", "_")
     # temp_some_ = str(invoice_.owner_name)  + str(invoice_.id) + "(" + str(invoice_.amount_after_freight)+ ")"+ "__"
+    place_ = kwargs.get('place_', '')
     temp_some_ =  underscored_name +  str(invoice_.id) + "(" + str(invoice_.amount_after_freight)+ ")"+ "__"
-    pdf_file_name = os.path.join(pdf_dir, temp_some_ + ".pdf")
+    if place_:
+        import errno
+        try:
+            os.makedirs('temp_/invoices/' + place_)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                pass
+        # try:
+        #     os.system('mkdir temp_/invoices/' + place_)
+        # except Exception as e:
+        #     pass
+            # print(e)
+        pdf_file_name = os.path.join(pdf_dir, place_)
+        pdf_file_name = os.path.join(pdf_file_name, temp_some_ + ".pdf")
+    else:
+        pdf_file_name = os.path.join(pdf_dir, temp_some_ + ".pdf")
     # print('dtd is {}'.format(dtd))
     margin = 0.5*units.cm
     if page_size == 'A5':
@@ -99,7 +114,7 @@ def create_(invoice_, page_size, **kwargs):
         c = canvas.Canvas(pdf_file_name, pagesize=pagesizes.landscape(pagesizes.A6))
         wid, hei = pagesizes.landscape(pagesizes.A6) # 420, 297 for A6 landscape
         max_page_item_count = 19
-    width = wid - margin
+    # width = wid - margin
     height = hei  -  margin - 5
     y_start_value = height
     h = y_start_value

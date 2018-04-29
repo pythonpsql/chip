@@ -51,7 +51,7 @@ def chip():
             tr.get_gst_customer_balance(place=place)
             input_ = None
             continue
-        elif input_.get("arg1") == "slm1":
+        elif input_.get("arg1") == "slmc":
             tr.get_customer_balance()
             input_ = None
             continue
@@ -103,7 +103,7 @@ def chip():
         elif input_.get("arg1") == "sl":
             input_ = tr.ledger_operations("sale_transaction")
             continue
-        elif input_.get("arg1") == "sbm":
+        elif input_.get("arg1") == "sbmc":
             input_ = tr.get_a_balance("sale_transaction", master_=True)
             continue
         elif input_.get("arg1") == "sbma":

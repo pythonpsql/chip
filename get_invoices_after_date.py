@@ -2,20 +2,33 @@
 from database import Database, CursorFromConnectionFromPool as conn
 import common_functions as cf
 import os
-import sale_report
+import sale_report, gst_report
 import invoice
 
 def get_invoices(place, date_):
     with conn() as cursor:
         cursor.execute("select id, owner_name,amount_after_freight from master.sale_invoice where lower(owner_place) = %s and date_ > %s", (place, date_))
         result = cursor.fetchall()
-        print(result)
+        # print(result)
         return result
 
-def create_pdf(result):
-    for a in result:
-        invoice_ = invoice.get_existing_invoice("sale_invoice", a[0], master_=True)
-        sale_report.create_(invoice_, 'A6', master_=True, do_not_open_preview=True)
+def get_gst_invoices(place, date_):
+    with conn() as cursor:
+        cursor.execute("select id, owner_name,amount_after_gst from sale_invoice where lower(owner_place) = %s and date_ > %s and gst_invoice_no is not null", (place, date_))
+        result = cursor.fetchall()
+        # print(result)
+        return result
+
+def create_pdf(result, **kwargs):
+    gst_print = kwargs.get('gst_print','')
+    if gst_print:
+        for a in result:
+            invoice_ = invoice.get_existing_invoice("sale_invoice", a[0], **kwargs)
+            gst_report.create_(invoice_, 'A5', **kwargs, do_not_open_preview=True)
+    else:
+        for a in result:
+            invoice_ = invoice.get_existing_invoice("sale_invoice", a[0], **kwargs)
+            sale_report.create_(invoice_, 'A6', **kwargs, do_not_open_preview=True)
 
 def move_invoices(result):
     import glob
@@ -43,12 +56,10 @@ if __name__ == "__main__":
     place = place.lower()
     date_ = cf.prompt_("Enter starting date: ", [], default_="2018-")
     result = get_invoices(place, date_)
+    gst_result = get_gst_invoices(place, date_)
     if result is not None:
-        create_pdf(result)
-        try:
-            os.system('mkdir temp_/invoices/' + place)
-        except Exception as e:
-            print(e)
-        move_invoices(result)
+        create_pdf(result, master_=True, place_=place)
     else:
         print("No invoices were found for {} after {}".format(place, date_))
+    if gst_result  is not None:
+        create_pdf(gst_result, place_=place, gst_print=True)

@@ -51,7 +51,7 @@ def get_existing_invoice(invoice_type, id_, **kwargs):
     invoice_.no_ = invoice_properties[0]
     invoice_.gst_invoice_no = invoice_properties[20]
     invoice_.gst_owner_name = invoice_properties[21]
-    print('gst invoice no: {}'.format(invoice_.gst_invoice_no))
+    # print('gst invoice no: {}'.format(invoice_.gst_invoice_no))
     invoice_.freight = invoice_properties[2]
     invoice_.amount_before_freight = invoice_properties[3]
     invoice_.transport_name = invoice_properties[4]

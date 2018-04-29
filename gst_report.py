@@ -6,11 +6,13 @@ from num2words import num2words
 import os
 import required.custom_data as custom_data
 from decimal import Decimal
+import common_functions as cf
+
 pagesize = A4
 width, height = pagesize
 project_dir = os.path.dirname(os.path.abspath(__file__))
-pdf_dir = os.path.join(project_dir, "temp_")
-pdf_dir = os.path.join(pdf_dir, "gst_invoices")
+temp_dir = os.path.join(project_dir, "temp_")
+pdf_dir = os.path.join(temp_dir, "gst_invoices")
 font_dir = os.path.join(project_dir, "required")
 font_dir = os.path.join(font_dir, "fonts")
 font_path = os.path.join(font_dir, "CarroisGothic-Regular.ttf")
@@ -251,7 +253,28 @@ def create_(invoice_, page_size, **kwargs):
     invoice_no = str(invoice_.gst_invoice_no)
     # invoice_no = str(invoice_info_p[0][4])
     import os
-    pdf_file_name = os.path.join(pdf_dir, invoice_no + ".pdf")
+    place_ = kwargs.get('place_', '')
+    underscored_name = invoice_.gst_owner_name.replace(" ", "_")
+    temp_some_ =  underscored_name +  str(invoice_no) + "(" + str(invoice_.amount_after_gst)+ ")"+ "__"
+    if place_:
+        import errno
+        try:
+            os.makedirs('temp_/invoices/' + place_)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                pass
+        # try:
+        #     os.system('mkdir temp_/invoices/' + place_)
+        # except Exception as e:
+        #     pass
+            # print(e_
+
+        pdf_dir = os.path.join(temp_dir, "invoices")
+        pdf_file_name = os.path.join(pdf_dir, place_)
+        pdf_file_name = os.path.join(pdf_file_name, temp_some_ + ".pdf")
+    else:
+        pdf_file_name = os.path.join(pdf_dir, temp_some_ + ".pdf")
+    # pdf_file_name = os.path.join(pdf_dir, invoice_no + ".pdf")
     c = canvas.Canvas(pdf_file_name, pagesize=A4)
     setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transactor_place_p, customer_details_p,c, memo_type_p)
     i_co = 1
@@ -289,6 +312,19 @@ def create_(invoice_, page_size, **kwargs):
             c = setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transactor_place_p, customer_details_p, c, memo_type_p)
     c.showPage()
     c.save()
+    do_not_open_preview = kwargs.get('do_not_open_preview', '')
+    tg = kwargs.get('tg', '')
+    # read as number of print
+    if do_not_open_preview:
+        return None
+    pdf_file_name =  "\"" + pdf_file_name + "\""
+    if tg:
+        if tg == 'Rounak':
+            cf.send_file_telegram(pdf_file_name, me=True)
+            return None
+        elif tg == 'Madan':
+            cf.send_file_telegram(pdf_file_name, me=False)
+            return None
     try:
         from sys import platform
         import os
