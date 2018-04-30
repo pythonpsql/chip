@@ -31,7 +31,7 @@ logging.basicConfig(filename=log_file, format="%(message)s", level = logging.DEB
 color_one = colored.fg("green")
 
 style = Style.from_dict({
-    '': '#7CFC00',
+    '': '#2AA198',
     # 'title': '#00aa00'
     # 'title': '#FF4500'
     'title': '#808000'
