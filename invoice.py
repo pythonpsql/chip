@@ -247,21 +247,34 @@ class Invoice():
         # self.display_header()
         if all_:
             if result:
+                result = self.display_footer(result)
+                # print(result)
                 view_print(result,self)
                 print("Count: {}".format(len(result)))
         elif len(result) > 5:
-            view_print(result[-5:], self)
+            result = result[-5:]
+            result = self.display_footer(result)
+            view_print(result, self)
             print("Last 5 items have been shown")
         else:
+            result = self.display_footer(result)
             view_print(result, self)
-        self.display_footer()
+        # self.display_footer()
 
-    def display_footer(self):
+    def display_footer(self, result):
         if not self.freight:
-            print("Total: {}".format(self.amount_before_freight))
+            result.append(['Total', None, None, None, None,  self.amount_before_freight, 0, 0])
+            # print('reached displa_foo')
+            # print(result)
+            return result
+            # print("Total: {}".format(self.amount_before_freight))
+
         else:
-            print("Freight: {}".format(self.freight))
-            print( "Total: {}".format(self.amount_after_freight))
+            result.append(['Freight', None, None, None, None,  self.freight, 0, 0])
+            result.append(['Total', None, None, None, None,  self.amount_after_freight, 0, 0])
+            return result
+            # print("Freight: {}".format(self.freight))
+            # print( "Total: {}".format(self.amount_after_freight))
 
 
     def update_invoice_detail(self, edit_id, property_, new_value):
@@ -343,7 +356,7 @@ def view_print(result, self=None):
     for a in result:
         packed_ = a[-1]
         # result = a[:-2] # remove pack and print_name
-        a0 = a[0] if not packed_ else colored.stylize(a[0], colored.fg("31"))
+        a0 = a[0] if not packed_ else colored.stylize(a[0], colored.fg("11"))
         a4 = '' if a [4] is None else a[4]
         new_list.append([a0, a[1], a[2], a[3], a4, a[5]])
         # pt.add_row([a0, a[1], a[2], a[3], a4, a[5], a[6]])
@@ -352,7 +365,7 @@ def view_print(result, self=None):
     col_ = [colored.stylize(a, colored.fg("138")) for a in col_]
     # cf.pretty_(['Date', 'No', 'Name'],((cf.reverse_date(str(self.date_)),str(self.no_), self.owner.name+" ("+self.owner.place+")"), ))
     if self is not None:
-        header_ = (cf.reverse_date(str(self.date_)), self.owner.name+" ("+self.owner.place+")")
+        header_ = (cf.reverse_date(str(self.date_)), self.owner.name+" ("+self.owner.place+"): " + str(self.amount_after_freight))
     else:
         header_ = '*'
 

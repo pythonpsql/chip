@@ -58,8 +58,8 @@ def get_current_timestamp():
 def terminaltables_(columns_, data_, header_='*', align_right=[], align_left=[]):
     # align_left is actually default, so it should not be needed for now
     if header_ is not None:
-        header_ = "...".join(header_)
-        header_ = colored.stylize(header_, colored.fg('30'))
+        header_ = "   ".join(header_)
+        header_ = colored.stylize(header_, colored.fg('38'))
     data_ = (columns_, *data_)
 
     table_instance = SingleTable(data_, header_)
@@ -67,6 +67,7 @@ def terminaltables_(columns_, data_, header_='*', align_right=[], align_left=[])
     # table_instance.outer_row_border = Falsaaae
     table_instance.outer_border = True
     # table_instance.inner_heading_row_border = False
+    table_instance.inner_footing_row_border = True
     table_instance.inner_column_border = True
     # table_outer_borders = table_instance.table.splitlines()
 
@@ -287,7 +288,7 @@ def pretty_(columns_, tuple_, **kwargs):
             # print('ab: {}'.format(ab))
             if ab is None:
                 ab = ''
-            ab_ = colored.stylize(str(ab), colored.fg('30'))
+            ab_ = colored.stylize(str(ab), colored.fg('75'))
             a_new_tuple = a_new_tuple + (ab_,)
         new_tuple = new_tuple + (a_new_tuple,)
 
