@@ -256,6 +256,7 @@ def create_(invoice_, page_size, **kwargs):
     place_ = kwargs.get('place_', '')
     underscored_name = invoice_.gst_owner_name.replace(" ", "_")
     temp_some_ =  underscored_name +  str(invoice_no) + "(" + str(invoice_.amount_after_gst)+ ")"+ "__"
+    pdf_dir = os.path.join(temp_dir, "invoices")
     if place_:
         import errno
         try:
@@ -269,7 +270,6 @@ def create_(invoice_, page_size, **kwargs):
         #     pass
             # print(e_
 
-        pdf_dir = os.path.join(temp_dir, "invoices")
         pdf_file_name = os.path.join(pdf_dir, place_)
         pdf_file_name = os.path.join(pdf_file_name, temp_some_ + ".pdf")
     else:
