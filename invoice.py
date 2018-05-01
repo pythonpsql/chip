@@ -1,10 +1,10 @@
 from database import CursorFromConnectionFromPool as conn
-from prettytable import PrettyTable
+# from prettytable import PrettyTable
 from psycopg2 import sql
 from decimal import Decimal
 import colored
 import common_functions as cf
-import invoice_detail
+# import invoice_detail
 import owner
 
 # TODO: Make invoice_no field unique in sale_invoice table
@@ -244,16 +244,16 @@ class Invoice():
 
     def view_invoice_details(self, result, **kwargs):
         all_ = kwargs.get('all_','')
-        self.display_header()
+        # self.display_header()
         if all_:
             if result:
-                view_print(result)
+                view_print(result,self)
                 print("Count: {}".format(len(result)))
         elif len(result) > 5:
-            view_print(result[-5:])
+            view_print(result[-5:], self)
             print("Last 5 items have been shown")
         else:
-            view_print(result)
+            view_print(result, self)
         self.display_footer()
 
     def display_footer(self):
@@ -333,26 +333,37 @@ class Invoice():
     def validate_before_save(self):
         pass
 
-def view_print(result):
-    left_align = ["name"]
-    right_align = ["qty", "unit", "rate","discount", "sub_total"]
-    result = [a[:-2] for a in result]
-    cf.pretty_(invoice_detail.detail_columns[:-1], result)
-    return None
-    pt = PrettyTable(invoice_detail.detail_columns)
+def view_print(result, self=None):
+    # left_align = ["name"]
+    # right_align = ["qty", "unit", "rate","discount", "sub_total"]
+    # result = [a[:-2] for a in result]
+    # cf.pretty_(invoice_detail.detail_columns[:-1], result)
+    # pt = PrettyTable(invoice_detail.detail_columns)
+    new_list=[]
     for a in result:
         packed_ = a[-1]
-        result = a[:-1]
-        a0 = a[0] if not packed_ else colored.stylize(a[0], colored.fg("green"))
+        # result = a[:-2] # remove pack and print_name
+        a0 = a[0] if not packed_ else colored.stylize(a[0], colored.fg("31"))
         a4 = '' if a [4] is None else a[4]
-        pt.add_row([a0, a[1], a[2], a[3], a4, a[5], a[6]])
-    if left_align:
-        for a in left_align:
-            pt.align[a] = "l"
-    if right_align:
-        for a in right_align:
-            pt.align[a] = "r"
-    print(pt)
+        new_list.append([a0, a[1], a[2], a[3], a4, a[5]])
+        # pt.add_row([a0, a[1], a[2], a[3], a4, a[5], a[6]])
+    col_ = ['Name', 'Qty', 'Unit', 'Rate', 'Disc', 'Total']
+    # col_ = invoice_detail.detail_columns[:-1]
+    col_ = [colored.stylize(a, colored.fg("138")) for a in col_]
+    # cf.pretty_(['Date', 'No', 'Name'],((cf.reverse_date(str(self.date_)),str(self.no_), self.owner.name+" ("+self.owner.place+")"), ))
+    if self is not None:
+        header_ = (cf.reverse_date(str(self.date_)), self.owner.name+" ("+self.owner.place+")")
+    else:
+        header_ = '*'
+
+    cf.pretty_(col_, new_list, align_right=range(1,6), header_=header_)
+    # if left_align:
+    #     for a in left_align:
+    #         pt.align[a] = "l"
+    # if right_align:
+    #     for a in right_align:
+    #         pt.align[a] = "r"
+    # print(pt)
 
 def get_date(invoice_type):
     if invoice_type == "purchase_invoice":

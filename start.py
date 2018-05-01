@@ -259,9 +259,9 @@ def chip():
                 input_ = None
                 continue
             invoice_ = invoice.get_existing_invoice(invoice_type, last_invoice_id)
-            print("reahced here0")
+            # print("reahced here0")
             invoice_.view_invoice_details(invoice_.fetch_invoice_details())
-            print("reahced here")
+            # print("reahced here")
             input_ = cm.command_loop(invoice_)
             continue
         elif input_.get("arg1") in ["cun", "ven"]:

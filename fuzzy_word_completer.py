@@ -1,11 +1,10 @@
 
 from __future__ import unicode_literals
-from database import Database, CursorFromConnectionFromPool as conn
+from database import Database
 from six import string_types
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit import prompt
 from fuzzyfinder import fuzzyfinder as ff
-import common_functions as cf
 import owner
 
 __all__ = (
@@ -32,6 +31,10 @@ class WordCompleter(Completer):
         assert all(isinstance(w, string_types) for w in self.words)
 
     def get_completions(self, document, complete_event):
+        # bg_color = '#959a7f'
+        # fg_color = '#111111'
+        # style='bg:' + bg_color +' '+ 'fg:' + fg_color
+        # selected_style='fg:'+ fg_color + ' '+ 'bg:' + bg_color
         # Get word/text before cursor.
         if self.sentence:
             word_before_cursor = document.text_before_cursor

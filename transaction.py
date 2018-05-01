@@ -154,10 +154,13 @@ def print_ledger(result, owner_type, opening_balance):
     if owner_type == "vendor": money = 'Payment'
     columns = ['Date', 'id_', 'Invoice', money, 'Balance']
     # right_align_columns = ['id', 'Invoice', money, 'Balance']
-    left_align_columns=['Date']
-    pt = PrettyTable(columns)
+    # left_align_columns=['Date']
+    # pt = PrettyTable(columns)
     print('OB is {}'.format(opening_balance))
-    pt.add_row(['Opening', '','','',str(opening_balance)])
+    new_list = []
+    new_list.append(['Opening', '','','',str(opening_balance)])
+
+    # pt.add_row(['Opening', '','','',str(opening_balance)])
     # pt.set_style(PLAIN_COLUMNS)
     if result:
         for a in result:
@@ -174,13 +177,15 @@ def print_ledger(result, owner_type, opening_balance):
                 a3 = ''
             else:
                 a3 = a[3]
-            pt.add_row([a0, a1, a2, a3, a[4]])
-        pt.align = 'r'
-        for l in left_align_columns:
-            pt.align[l] = 'l'
+            new_list.append([a0, a1, a2, a3, a[4]])
+    cf.pretty_(columns, new_list, align_right=range(1,5))
+            # pt.add_row([a0, a1, a2, a3, a[4]])
+        # pt.align = 'r'
+        # for l in left_align_columns:
+            # pt.align[l] = 'l'
     # for r in right_align_columns:
     #     pt.align[r] = 'r'
-    print(pt)
+    # print(pt)
 
 def command_loop(tr_type, owner_, result, opening_balance, view_, **kwargs):
     master_ = kwargs.get("master_", '')

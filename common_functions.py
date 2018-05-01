@@ -55,10 +55,21 @@ def get_current_timestamp():
     # 2017-12-23 08:53:09
     return datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
-def terminaltables_(header_, columns_, data_, align_right=[], align_left=[]):
-    # align_left is actually default, so it should not be neede for now
+def terminaltables_(columns_, data_, header_='*', align_right=[], align_left=[]):
+    # align_left is actually default, so it should not be needed for now
+    if header_ is not None:
+        header_ = "...".join(header_)
+        header_ = colored.stylize(header_, colored.fg('30'))
     data_ = (columns_, *data_)
+
     table_instance = SingleTable(data_, header_)
+    # table_instance.inner_row_border = True
+    # table_instance.outer_row_border = Falsaaae
+    table_instance.outer_border = True
+    # table_instance.inner_heading_row_border = False
+    table_instance.inner_column_border = True
+    # table_outer_borders = table_instance.table.splitlines()
+
     if align_right:
         for a in align_right:
             table_instance.justify_columns[a] = 'right'
@@ -266,9 +277,9 @@ def send_file_telegram(file_path, me=True):
     os.system(command_)
 
 def pretty_(columns_, tuple_, **kwargs):
-    right_align = kwargs.get('right_align', '')
+    # right_align = kwargs.get('right_align', '')
     # left_align = kwargs.get('left_align', '')
-    pt = PrettyTable(columns_)
+    # pt = PrettyTable(columns_)
     new_tuple = ()
     for a in tuple_:
         a_new_tuple = ()
@@ -276,18 +287,19 @@ def pretty_(columns_, tuple_, **kwargs):
             # print('ab: {}'.format(ab))
             if ab is None:
                 ab = ''
-            a_new_tuple = a_new_tuple + (str(ab),)
+            ab_ = colored.stylize(str(ab), colored.fg('30'))
+            a_new_tuple = a_new_tuple + (ab_,)
         new_tuple = new_tuple + (a_new_tuple,)
 
-    terminaltables_('*', columns_, new_tuple)
+    terminaltables_(columns_, new_tuple, **kwargs)
     return None
-    for a in new_tuple:
-        # print(a)
-        pt.add_row(a)
-    pt.align = 'l'
-    for r in right_align:
-        pt.align[r] = 'r'
-    print(pt)
+    # for a in new_tuple:
+    #     # print(a)
+    #     pt.add_row(a)
+    # pt.align = 'l'
+    # for r in right_align:
+    #     pt.align[r] = 'r'
+    # print(pt)
 
 invoice_detail_type_d = {
         "sale_invoice": "si_detail",
