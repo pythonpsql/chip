@@ -55,7 +55,7 @@ def get_current_timestamp():
     # 2017-12-23 08:53:09
     return datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
-def terminaltable_(header_, columns_, data_, align_right=[], align_left=[]):
+def terminaltables_(header_, columns_, data_, align_right=[], align_left=[]):
     # align_left is actually default, so it should not be neede for now
     data_ = (columns_, *data_)
     table_instance = SingleTable(data_, header_)
@@ -277,9 +277,10 @@ def pretty_(columns_, tuple_, **kwargs):
             if ab is None:
                 ab = ''
             a_new_tuple = a_new_tuple + (str(ab),)
-            # print(a_new_tuple)
         new_tuple = new_tuple + (a_new_tuple,)
-        # print(new_tuple)
+
+    terminaltables_('*', columns_, new_tuple)
+    return None
     for a in new_tuple:
         # print(a)
         pt.add_row(a)

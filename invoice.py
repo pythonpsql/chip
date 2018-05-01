@@ -240,7 +240,7 @@ class Invoice():
 
     def display_header(self):
         print("{}".format(self.invoice_type))
-        cf.pretty_table_print(['Date', 'No', 'Name'], [cf.reverse_date(str(self.date_)),str(self.no_), self.owner.name+" ("+self.owner.place+")"])
+        cf.pretty_(['Date', 'No', 'Name'], ((cf.reverse_date(str(self.date_)),str(self.no_), self.owner.name+" ("+self.owner.place+")"), ))
 
     def view_invoice_details(self, result, **kwargs):
         all_ = kwargs.get('all_','')
@@ -335,7 +335,10 @@ class Invoice():
 
 def view_print(result):
     left_align = ["name"]
-    right_align = ["qty", "unit", "rate","discount", "sub_total", "product_print_name"]
+    right_align = ["qty", "unit", "rate","discount", "sub_total"]
+    result = [a[:-2] for a in result]
+    cf.pretty_(invoice_detail.detail_columns[:-1], result)
+    return None
     pt = PrettyTable(invoice_detail.detail_columns)
     for a in result:
         packed_ = a[-1]
