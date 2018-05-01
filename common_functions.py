@@ -1,4 +1,4 @@
-from database import Database, CursorFromConnectionFromPool as conn
+from database import  CursorFromConnectionFromPool as conn
 # from prompt_toolkit.contrib.completers import WordCompleter
 from fuzzy_word_completer import WordCompleter
 from prompt_toolkit import prompt
@@ -11,6 +11,7 @@ import colored
 # from prompt_toolkit.styles import style_from_dict
 from psycopg2 import sql
 from prettytable import  PrettyTable
+from terminaltables import SingleTable
 import datetime
 import logging
 import os
@@ -53,6 +54,18 @@ def get_current_date_two():
 def get_current_timestamp():
     # 2017-12-23 08:53:09
     return datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+
+def terminaltable_(header_, columns_, data_, align_right=[], align_left=[]):
+    # align_left is actually default, so it should not be neede for now
+    data_ = (columns_, *data_)
+    table_instance = SingleTable(data_, header_)
+    if align_right:
+        for a in align_right:
+            table_instance.justify_columns[a] = 'right'
+    if align_left:
+        for a in align_left:
+            table_instance.justify_columns[a] = 'left'
+    print(table_instance.table)
 
 def execute_(sq, identifier_list,  **kwargs):
     arg_ = kwargs.get('arg_', '')
