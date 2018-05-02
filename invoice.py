@@ -9,7 +9,7 @@ import owner
 
 # TODO: Make invoice_no field unique in sale_invoice table
 
-sq_properties = ['id', 'invoice_no', 'date_', 'freight', 'amount_before_freight', 'transport_name', 'transport_lr_no', 'transport_lr_date', 'transport_lr_bags', 'site', 'note', 'memo_type', 'gst_5', 'gst_12', 'gst_18', 'gst_28', 'id_owner', 'amount_after_freight', 'owner_name', 'owner_place', 'amount_after_gst', 'gst_invoice_no', 'gst_owner_name', 'creation_date']
+sq_properties = ['id', 'invoice_no', 'date_', 'freight', 'amount_before_freight', 'transport_name', 'transport_lr_no', 'transport_lr_date', 'transport_lr_bags', 'site', 'note', 'memo_type', 'gst_5', 'gst_12', 'gst_18', 'gst_28', 'id_owner', 'amount_after_freight', 'owner_name', 'owner_place', 'amount_after_gst', 'gst_invoice_no', 'gst_owner_name', 'freight_gst', 'creation_date', ]
 
 def get_new_invoice(invoice_type, **kwargs):
     invoice_ = Invoice(invoice_type)
@@ -30,6 +30,7 @@ def get_new_invoice(invoice_type, **kwargs):
     invoice_.gst_12 = 0
     invoice_.gst_18 = 0
     invoice_.gst_28 = 0
+    invoice_.freight_gst= 0
     invoice_.amount_before_freight = 0
     invoice_.amount_after_freight = 0
     invoice_.amount_after_gst = 0
@@ -69,6 +70,7 @@ def get_existing_invoice(invoice_type, id_, **kwargs):
     invoice_.owner_name = invoice_properties[17]
     invoice_.owner_place = invoice_properties[18]
     invoice_.amount_after_gst= invoice_properties[19]
+    invoice_.freight_gst=invoice_properties[22]
     invoice_.detail_table = cf.invoice_detail_type_d[invoice_type]
     return invoice_
 
@@ -107,7 +109,7 @@ class Invoice():
         if not self.amount_before_freight: self.amount_before_freight= 0
         # called by set_freight, not called directly
         self.amount_after_freight = Decimal(self.amount_before_freight) + Decimal(self.freight)
-        self.amount_after_freight = Decimal(self.amount_after_freight.quantize(Decimal("1")))
+        self.amount_after_freight = self.amount_after_freight.quantize(Decimal("1.00"))
         cf.cursor_(sql.SQL("update {} set (amount_after_freight) = (%s) where id = %s returning id").format(sql.Identifier(self.invoice_type)), arguments=(self.amount_after_freight, self.id))
 
     def set_amount_after_gst(self):
@@ -115,12 +117,12 @@ class Invoice():
         self.gst_12 =  self.get_gst_amount(12)
         self.gst_18 =  self.get_gst_amount(18)
         self.gst_28 =  self.get_gst_amount(28)
-        freight_gst = (Decimal(self.freight) * Decimal(0.18)).quantize(Decimal("1.00"))
-        print('freight_gst: {}'.format(freight_gst))
-        total_gst = Decimal(self.gst_5 + self.gst_12 + self.gst_18 + self.gst_28 + freight_gst).quantize(Decimal("1.00"))
+        self.freight_gst = (Decimal(self.freight) * Decimal(0.18)).quantize(Decimal("1.00"))
+        print('freight_gst: {}'.format(self.freight_gst))
+        total_gst = Decimal(self.gst_5 + self.gst_12 + self.gst_18 + self.gst_28 + self.freight_gst).quantize(Decimal("1.00"))
         self.amount_after_gst = (self.amount_after_freight + total_gst).quantize(Decimal("1"))
         print('amount_after_gst: {}'.format(self.amount_after_gst))
-        cf.cursor_(sql.SQL("update {} set (gst_5, gst_12, gst_18, gst_28, amount_after_gst) = (%s, %s, %s, %s, %s) where id = %s returning id").format(sql.Identifier(self.invoice_type)), arguments=(self.gst_5, self.gst_12, self.gst_18, self.gst_28, self.amount_after_gst, self.id))
+        cf.cursor_(sql.SQL("update {} set (gst_5, gst_12, gst_18, gst_28, freight_gst, amount_after_gst) = (%s, %s, %s, %s, %s, %s) where id = %s returning id").format(sql.Identifier(self.invoice_type)), arguments=(self.gst_5, self.gst_12, self.gst_18, self.gst_28, self.freight_gst, self.amount_after_gst, self.id))
 
     def update_invoice_with_sub_total(self):
         self.set_amount_before_freight()
@@ -219,16 +221,16 @@ class Invoice():
             # print('there is no result')
             cf.log_('get_gst_amount_result is {}'.format(result))
             return 0
-        return result[0]
+        return Decimal(result[0]).quantize(Decimal("1.00"))
 
     def get_amount_before_freight(self):
         with conn() as cursor:
-            cursor.execute(sql.SQL("select sum(sub_total) from {} where id_invoice = %s").format(sql.Identifier(self.detail_table)), (self.id, ))
+            cursor.execute(sql.SQL("select Round(sum(sub_total),2) from {} where id_invoice = %s").format(sql.Identifier(self.detail_table)), (self.id, ))
             result = cursor.fetchone()
         cf.log_(result)
         if not result:
             return 0
-        return result[0]
+        return Decimal(result[0]).quantize(Decimal("1.00"))
 
     def set_amount_before_freight(self):
         self.amount_before_freight = self.get_amount_before_freight()
@@ -263,7 +265,7 @@ class Invoice():
 
     def display_footer(self, result):
         if not self.freight:
-            result.append(['Total', None, None, None, None,  self.amount_before_freight, 0, 0])
+            result.append(['Total', None, None, None, None,  colored.stylize(self.amount_before_freight, cf.blue_underlined), 0, 0])
             # print('reached displa_foo')
             # print(result)
             return result
@@ -369,7 +371,7 @@ def view_print(result, self=None):
     else:
         header_ = '*'
 
-    cf.pretty_(col_, new_list, align_right=range(1,6), header_=header_)
+    cf.pretty_(col_, new_list, align_right=range(1,6), header_=header_, footer_=True)
     # if left_align:
     #     for a in left_align:
     #         pt.align[a] = "l"

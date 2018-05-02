@@ -30,6 +30,8 @@ back_ = "back"
 logging.basicConfig(filename=log_file, format="%(message)s", level = logging.DEBUG)
 
 color_one = colored.fg("green")
+blue_ = colored.fg('blue')
+blue_underlined = colored.fg('blue') +  colored.attr('underlined')
 
 style = Style.from_dict({
     '': '#2AA198',
@@ -55,7 +57,7 @@ def get_current_timestamp():
     # 2017-12-23 08:53:09
     return datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
-def terminaltables_(columns_, data_, header_='*', align_right=[], align_left=[]):
+def terminaltables_(columns_, data_, header_='*', align_right=[], align_left=[], footer_=False):
     # align_left is actually default, so it should not be needed for now
     if header_ is not None:
         header_ = "   ".join(header_)
@@ -67,7 +69,7 @@ def terminaltables_(columns_, data_, header_='*', align_right=[], align_left=[])
     # table_instance.outer_row_border = Falsaaae
     table_instance.outer_border = True
     # table_instance.inner_heading_row_border = False
-    table_instance.inner_footing_row_border = True
+    table_instance.inner_footing_row_border = footer_
     table_instance.inner_column_border = True
     # table_outer_borders = table_instance.table.splitlines()
 
@@ -288,7 +290,7 @@ def pretty_(columns_, tuple_, **kwargs):
             # print('ab: {}'.format(ab))
             if ab is None:
                 ab = ''
-            ab_ = colored.stylize(str(ab), colored.fg('75'))
+            ab_ = colored.stylize(str(ab), blue_)
             a_new_tuple = a_new_tuple + (ab_,)
         new_tuple = new_tuple + (a_new_tuple,)
 

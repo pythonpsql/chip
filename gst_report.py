@@ -46,33 +46,35 @@ def setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transac
     # transport_lr_no_of_bags = invoice_info_p[0][3]
     invoice_no = str(invoice_info_p.gst_invoice_no)
     amount_before_tax = invoice_info_p.amount_before_freight
-    # print(amount_before_tax)
+    print(amount_before_tax)
     if amount_before_tax is None: amount_before_tax = 0
-    amount_before_tax = (amount_before_tax).quantize(Decimal("1"))
+    amount_before_tax = (amount_before_tax).quantize(Decimal("1.00"))
+    print(amount_before_tax)
     # print(freight_p)
     if invoice_info_p.gst_18 is None: invoice_info_p.gst_18= 0
-    cgst9_amount = (Decimal(invoice_info_p.gst_18)/Decimal(2) + Decimal(freight_p) * Decimal(0.09)).quantize(Decimal("1.00"))
+    cgst9_amount = ((invoice_info_p.gst_18+invoice_info_p.freight_gst)/Decimal(2)).quantize(Decimal("1.00"))
     # if cgst9_amount is None: cgst9_amount = 0
     # cgst9_amount = cgst9_amount.quantize(Decimal("1.00"))
-    sgst9_amount = cgst9_amount
+    # sgst9_amount = cgst9_amount
     if invoice_info_p.gst_28 is None: invoice_info_p.gst_28= 0
     cgst14_amount = (Decimal(invoice_info_p.gst_28)/Decimal(2)).quantize(Decimal("1.00"))
-    sgst14_amount = cgst9_amount
+    # sgst14_amount = cgst9_amount
     # sgst9_amount = sgst9_amount.quantize(Decimal("1.00"))
     # cgst14_amount = invoice_info_p[0][8]
     if invoice_info_p.gst_5 is None: invoice_info_p.gst_5= 0
     cgst2_5_amount = (Decimal(invoice_info_p.gst_5)/Decimal(2)).quantize(Decimal("1.00"))
     if cgst2_5_amount is None: cgst2_5_amount = 0
-    sgst2_5_amount = cgst2_5_amount
+    # sgst2_5_amount = cgst2_5_amount
     if invoice_info_p.gst_12 is None: invoice_info_p.gst_12= 0
     cgst6_amount = (Decimal(invoice_info_p.gst_12)/Decimal(2)).quantize(Decimal("1.00"))
 
-    sgst6_amount = cgst6_amount
+    # sgst6_amount = cgst6_amount
     # cgst6_amount = invoice_info_p[0][15]
     # if cgst6_amount is None: cgst6_amount = 0
     cgst14_amount = cgst14_amount.quantize(Decimal("1.00"))
 
-    cgst9_taxable_amount = (Decimal(cgst9_amount)/ Decimal(9) * Decimal(100)).quantize(Decimal("1.00"))
+    cgst9_taxable_amount = invoice_info_p.amount_after_freight.quantize(Decimal("1.00"))
+    # cgst9_taxable_amount = (Decimal(cgst9_amount)/ Decimal(9) * Decimal(100)).quantize(Decimal("1.00"))
     cgst14_taxable_amount = (Decimal(cgst14_amount)/ Decimal(14) * Decimal(100)).quantize(Decimal("1.00"))
     cgst2_5_taxable_amount = (Decimal(cgst2_5_amount)/ Decimal(2.5) * Decimal(100)).quantize(Decimal("1.00"))
     cgst6_taxable_amount = (Decimal(cgst6_amount)/ Decimal(6) * Decimal(100)).quantize(Decimal("1.00"))
@@ -80,7 +82,7 @@ def setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transac
     if invoice_info_p.amount_after_gst is None: invoice_info_p.amount_after_gst = 0
     total_amount_after_gst = invoice_info_p.amount_after_gst
     # amount_after_gst = amount_after_gst.quantize(Decimal("1.00"))
-    site = invoice_info_p.site
+    # site = invoice_info_p.site
     # barcode_font = r"/carrois-gothic/CarroisGothic-Regular.ttf"
     # print(font_path)
 
@@ -178,21 +180,21 @@ def setup_page(invoice_detail_info_p, invoice_info_p, transactor_name_p, transac
     c.line(387,122,387,102)#grand total vertical
     c.line(387,222,387,122)#tax calculation vertical
     c.setFont("CarroisGothic-Regular", 12, leading=None)
-    c.drawString(390, 228, "Sub Total:")  # sub-total
-    c.drawRightString(550, 228, str(amount_before_tax)) # sub-total
+    c.drawString(390, 228, "Transport:")  # sub-total
+    if not freight_p == 0:
+        c.drawRightString(550, 228, str(freight_p)) # sub-total
     c.drawString(30, 205, "GST @ 5%")
     if not cgst2_5_taxable_amount == 0:
         c.drawRightString(190, 205, str(cgst2_5_taxable_amount))
         c.drawRightString(310,205,str(cgst2_5_amount * 2))
-    c.drawString(390,205,"Transport:")#transport
-    if not freight_p == 0:
-        c.drawRightString(550, 205, str(freight_p))
+    c.drawString(390,205,"Sub Total:")#transport
+    c.drawRightString(550, 205, str(invoice_info_p.amount_after_freight.quantize(Decimal("1.00"))))
     c.line(25,198,575,198)#transport horizontal
     c.drawString(30, 180, "GST @ 12%")
     if not cgst6_taxable_amount == 0:
         c.drawRightString(190, 180, str(cgst6_taxable_amount))
         c.drawRightString(310, 180, str(cgst6_amount * 2))
-    cgst = (cgst9_amount + cgst14_amount + cgst2_5_amount + cgst6_amount).quantize(Decimal("1"))
+    cgst = (cgst9_amount + cgst14_amount + cgst2_5_amount + cgst6_amount).quantize(Decimal("1.00"))
     c.drawRightString(550, 180, str(cgst))
     c.drawString(390,180,"CGST:")#cgst
     c.line(25,173,575,173)#cgst horizontal
