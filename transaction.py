@@ -369,7 +369,7 @@ def get_customer_balance(**kwargs):
             cursor.execute("select name, place, sum(invoice_amount) - sum(money_amount) + master.customer.opening_balance as balance from master.sale_ledger_view join master.customer on master.customer.id = master.sale_ledger_view.id_owner where master.customer.id = %s group by name, place, customer.opening_balance order by balance desc", (id_owner, ))
             result = cursor.fetchall()
     columns = ['name', 'place', 'balance']
-    cf.pretty_(columns, result, right_align = ['balance'])
+    cf.pretty_(columns, result, align_right = ['balance'])
     right_align_columns = ['balance']
     # left_align_columns = ['name', 'place']
     pt = PrettyTable(columns)
@@ -403,7 +403,7 @@ def get_gst_customer_balance(**kwargs):
             cursor.execute("select name, place, sum(invoice_amount) - sum(money_amount) + master.customer.opening_balance as balance from master.sale_ledger_view join master.customer on master.customer.id = master.sale_ledger_view.id_owner where master.customer.id = %s group by name, place, customer.opening_balance order by balance desc", (id_owner, ))
             result = cursor.fetchall()
     columns = ['name', 'place', 'balance']
-    cf.pretty_(columns, result, right_align = ['balance'])
+    cf.pretty_(columns, result, align_right = ['balance'])
     right_align_columns = ['balance']
     # left_align_columns = ['name', 'place']
     pt = PrettyTable(columns)
